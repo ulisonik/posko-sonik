@@ -716,17 +716,21 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
   function kembaliApp() { var p = S.trail.pop(); if (p) show(p, { noTrail: true }); }
   $('hBack').onclick = kembaliApp;
   /* ===== GERBANG TOMBOL BACK (HP/browser): lembar/scanner -> halaman sebelumnya -> konfirmasi keluar ===== */
-  var GB = { out: false };
-  try { history.replaceState({ g: 1 }, ''); history.pushState({ a: 1 }, ''); } catch (e) { /* mis. penampil artefak: abaikan */ }
+  var GB = { out: false, n: 0, armed: false };
+  /* Chrome HP mengabaikan entri riwayat yang dibuat TANPA sentuhan pengguna (history manipulation intervention) -> Back langsung keluar.
+     Maka entri "gerbang" juga didorong pada sentuhan/ketukan pertama, bukan hanya saat halaman dibuka. GB.n = jumlah entri di atas halaman. */
+  function gbPush() { try { history.pushState({ a: 1 }, ''); GB.n++; return true; } catch (e) { return false; } }
+  try { history.replaceState({ g: 1 }, ''); gbPush(); } catch (e) { /* mis. penampil artefak: abaikan */ }
+  ['pointerdown', 'touchstart', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, function () { if (GB.armed || GB.out) return; GB.armed = true; gbPush(); }, { capture: true, passive: true }); });
   window.addEventListener('popstate', function () {
     if (GB.out) return;
-    try { history.pushState({ a: 1 }, ''); } catch (e) { return; } // sisakan satu entri agar Back berikutnya tetap tertangkap
+    GB.n = Math.max(0, GB.n - 1); GB.armed = false; if (!gbPush()) return; // sisakan satu entri agar Back berikutnya tetap tertangkap; sentuhan berikutnya memasang entri baru yang sah
     if ($('katLb')) { katLbTutup(); return; }
     if (!$('scn').classList.contains('hide')) { closeScanner(); return; }
     if ($('sheet').classList.contains('show')) { closeSheet(); return; }
     if (S.trail.length > 0) { kembaliApp(); return; }
     tanya('Keluar dari aplikasi?', 'Anda akan meninggalkan POSKO SONIK.', 'Ya, keluar', function () {
-      GB.out = true; try { history.go(-2); } catch (e) { }
+      GB.out = true; try { history.go(-(GB.n + 1)); } catch (e) { }
       setTimeout(function () { GB.out = false; try { window.close(); } catch (e) { } toast('Tutup tab atau aplikasi ini secara manual untuk keluar.'); }, 600);
     }, 'Tetap di sini');
   });
