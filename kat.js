@@ -5,7 +5,7 @@
   document.head.appendChild(st);
 })();
 function katEsc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-/* Panduan visual kategori POSM. Foto: folder kat/ (kecil, hanya untuk thumbnail). Tanpa foto = ikon. Teks arti = DRAF, mohon dikoreksi bila kurang tepat. */
+/* Panduan visual kategori POSM. Foto: folder kat/ (kecil, hanya untuk thumbnail). Tanpa foto = ikon. Teks arti sudah dikonfirmasi user 14 Nov (termasuk POSTER dan PH Impra). */
 var KATG = {
   'CTA BACKRACK': { f: ['cta_backrack'], c: 1, w: ['cta_s1', 'cta_s2'], t: 'Stiker panjang yang biasa ditempel di gondola / rak, berisi informasi ajakan membeli.' },
   'FSU': { f: ['fsu_1', 'fsu_2', 'fsu_3'], c: 1, t: 'Floor Standing Unit: display yang berdiri di lantai.' },
