@@ -612,6 +612,38 @@
   }
 </style>
 
+<style id="desktop-rapi">
+  /* Laptop/desktop (>=900 px): isi memenuhi lebar layar, tidak menumpuk di kiri (user 17 Nov) */
+  @media (min-width:900px) {
+    main { max-width:1680px; margin:0 auto; padding:6px 40px 56px; }
+    .top { padding:22px 40px 12px; }
+    #app:not(.hide) > .top { max-width:none; }
+    .hero { max-width:none; }
+    .home-grid { max-width:none; grid-template-columns:minmax(0,1.7fr) minmax(340px,1fr); gap:32px; }
+    .req { max-width:none; }
+    .sum { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .search { max-width:none; }
+    .alert-list, .items { grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); }
+    #rwList, #rwNote { max-width:none; }
+    #fTx { max-width:none; grid-template-columns:minmax(380px,1fr) minmax(0,1.5fr); gap:40px; }
+    #fAdj { max-width:none; grid-template-columns:minmax(380px,1fr) minmax(0,1.5fr); gap:40px; }
+    #fBarang { max-width:1240px; grid-template-columns:minmax(300px,420px) minmax(0,1fr); gap:40px; }
+    #vOpn { max-width:none; }
+    .opn-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(380px,1fr)); }
+    /* daftar bersusun kolom, filter dibatasi lebarnya agar tidak melar */
+    #items, #pmtList { display:grid; grid-template-columns:repeat(auto-fill,minmax(440px,1fr)); gap:12px; align-items:start; }
+    #items.kotak { grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); }
+    #items > *, #pmtList > * { margin:0; }
+    #rwList { display:grid; grid-template-columns:repeat(auto-fill,minmax(440px,1fr)); gap:10px 12px; align-items:start; }
+    #rwList .day-h { grid-column:1 / -1; margin:10px 0 0; }
+    #rwList .rw-list { display:contents; }
+    #rwList .rw-list > * { margin:0; }
+    #fStatus, #fPmt, #fJenis, #oF { max-width:720px; }
+    #rq, .search, .katrow { max-width:720px; }
+    .katrow .katbtn { max-width:none; }
+    .katbtn { max-width:none; }
+  }
+</style>
 <style id="nav-aktif">
   /* Menu bawah (HP) aktif: garis hijau di atas + latar hijau muda + ikon/teks tebal */
   @media (max-width:899px) {
