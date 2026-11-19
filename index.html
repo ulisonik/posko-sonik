@@ -770,7 +770,18 @@
   .mi[data-go="label"] .ic,
   .mi[data-go="link"] .ic,
   .mi[data-go="panduan"] .ic { background:#F26722; color:#fff; box-shadow:none; }
+  .mi[data-go="laporan"] .ic { background:#129DDC; color:#fff; box-shadow:none; }
+  .mi[data-go="program"] .ic,
+  .mi[data-go="vid"] .ic,
+  .mi[data-go="ptut"] .ic { background:#F26722; color:#fff; box-shadow:none; }
   .mi .ic svg { stroke-width:2.3; }
+  /* HP: maks 4 menu per baris agar label tidak bertabrakan */
+  @media (max-width:640px) {
+    #menu .menu[data-n] { grid-auto-flow:row; grid-template-columns:repeat(4,minmax(0,1fr)); }
+    #menu .menu[data-n="1"], #menu .menu[data-n="2"], #menu .menu[data-n="3"] { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    #menu .mi { padding-left:1px; padding-right:1px; }
+    #menu .mi span:not(.ic):not(.badge) { font-size:11px; letter-spacing:-.1px; }
+  }
 </style>
 <style id="stok-kotak">
   .vmbtn { flex:none; width:44px; height:44px; border-radius:50%; background:#FFC72A; color:#17304F; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 8px rgba(0,0,0,.18); }
@@ -1388,7 +1399,8 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
   function paintMenu(menunggu) {
     var list = MENU.filter(function (m) { return !m.admin || S.me.peran === 'ADMIN'; });
     $('menu').innerHTML = MENU_GRUP.map(function (nama, gi) {
-      return '<div class="menu-g">' + esc(nama) + '</div><div class="menu">' + list.filter(function (m) { return m.g === gi; }).map(function (m) {
+      var grp = list.filter(function (m) { return m.g === gi; });
+      return '<div class="menu-g">' + esc(nama) + '</div><div class="menu" data-n="' + grp.length + '">' + grp.map(function (m) {
         return '<button class="mi ' + (m.c || '') + '" data-go="' + m.k + '"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="' + m.d + '"/></svg></span><span>' + esc(m.t) + '</span>' +
           (m.badge && menunggu ? '<span class="badge">' + menunggu + '</span>' : '') + '</button>';
       }).join('') + '</div>';
