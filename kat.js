@@ -42,3 +42,31 @@ function katLbBuka(src) {
 document.addEventListener('click', function (ev) { var im = ev.target.closest && ev.target.closest('.kat-ph img, .kat-w img'); if (im) { ev.preventDefault(); katLbBuka(im.getAttribute('src')); } });
 
 function katGaleri() { return Object.keys(KATG).map(function (k) { return '<div class="kat-row">' + katVis(k, 6) + '</div>'; }).join(''); }
+
+
+/* FOTO BARANG: ketuk untuk perbesar (katalog & keranjang pemohon, rincian barang & bukti admin). Memakai penampil katLbBuka di atas.
+   Hanya foto yang BENAR-BENAR ada (bukan ikon pengganti). Foto kecil diberi ikon kaca pembesar. */
+(function () {
+  var SEL = '.pc .img, .cr .th, .det-img, .foto-th, .bk-img, .bk-ttd';
+  var st = document.createElement('style'); st.id = 'foto-zoom-css';
+  st.textContent = '.pc .img.fz, .cr .th.fz, .det-img.fz, .foto-th.fz { cursor:zoom-in; position:relative; }' +
+    '.pc .img.fz::after, .det-img.fz::after { content:""; position:absolute; right:8px; bottom:8px; width:30px; height:30px; border-radius:50%; background:rgba(12,27,44,.62) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'2.4\' stroke-linecap=\'round\'%3E%3Ccircle cx=\'10.5\' cy=\'10.5\' r=\'6\'/%3E%3Cpath d=\'M15 15l5 5M10.5 8v5M8 10.5h5\'/%3E%3C/svg%3E") center/18px no-repeat; pointer-events:none; }' +
+    '.cr .th.fz::after, .foto-th.fz::after { content:""; position:absolute; right:2px; bottom:2px; width:16px; height:16px; border-radius:50%; background:rgba(12,27,44,.62) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'3\' stroke-linecap=\'round\'%3E%3Ccircle cx=\'10.5\' cy=\'10.5\' r=\'6\'/%3E%3Cpath d=\'M15 15l5 5\'/%3E%3C/svg%3E") center/11px no-repeat; pointer-events:none; }' +
+    '.bk-img, .bk-ttd { cursor:zoom-in; }';
+  document.head.appendChild(st);
+  function urlDari(el) {
+    if (el.tagName === 'IMG') return el.getAttribute('src');
+    var bg = (el.style && el.style.backgroundImage) || '';
+    var m = /url\(["']?(.*?)["']?\)/.exec(bg);
+    return m ? m[1] : '';
+  }
+  function tandai(root) { [].forEach.call((root || document).querySelectorAll(SEL), function (e) { if (e.tagName !== 'IMG' && !e.classList.contains('fz') && urlDari(e)) e.classList.add('fz'); }); }
+  var tmr; new MutationObserver(function () { clearTimeout(tmr); tmr = setTimeout(function () { tandai(); }, 60); }).observe(document.documentElement, { childList: true, subtree: true });
+  tandai();
+  // fase tangkap: mendahului penangan lain (mis. baris keranjang) agar ketukan foto = perbesar saja
+  document.addEventListener('click', function (ev) {
+    var el = ev.target.closest && ev.target.closest(SEL); if (!el) return;
+    var u = urlDari(el); if (!u) return;
+    ev.preventDefault(); ev.stopPropagation(); katLbBuka(u);
+  }, true);
+})();
