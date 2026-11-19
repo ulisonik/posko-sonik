@@ -1371,7 +1371,7 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
   /* ---------- navigasi antar halaman ---------- */
   var BELUM = {};
   /* ===== POSTER QR + ALUR (A3, portrait/landscape, PDF + PNG) — keputusan user 13 Nov: pengajuan lewat QR saja ===== */
-  var PST = { g: null, jenis: 'qr', arah: 'portrait', token: {} };
+  var PST = { g: null, jenis: 'gab', arah: 'portrait', token: {} };
   var RIB1 = 'M245 220 C 300 120 360 36 432 80 C 504 124 440 196 398 152 C 362 114 430 28 524 40 C 566 46 596 72 628 60';
   var RIB2 = 'M330 -20 C 360 40 420 62 470 22 S 560 -12 625 32';
   function posterUrl() { var u = new URL('ambil.html?k=' + encodeURIComponent(PST.token[PST.g] || ''), location.href); if (DEMO) u.searchParams.set('demo', '1'); return u.href; }
@@ -1415,6 +1415,30 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
         langkahChips(c, u, cx, 83 * u, 62 * u, ['1 Scan', '2 Pilih', '3 Ajukan', '4 Ambil'], 2.6 * u);
         kartuQr(c, W - 66 * u, 21 * u, 58 * u, url); teks(c, 'Arahkan kamera HP ke kotak QR', W - 37 * u, 87.5 * u, 3 * u, 600, '#fff', 'center');
       }
+    } else if (PST.jenis === 'gab') {
+      // QR + Alur dalam satu poster (gaya poster rilis): judul, pil gudang, 5 langkah, kartu QR
+      var ks5 = function (t, x, y, w, px, lh, warna) { var ws = t.split(' '), br = '', yy = y; c.font = '500 ' + px + 'px Poppins, system-ui, sans-serif'; ws.forEach(function (k) { var tt = (br + ' ' + k).trim(); if (c.measureText(tt).width > w && br) { teks(c, br, x, yy, px, 500, warna, 'center'); br = k; yy += lh; } else br = tt; }); teks(c, br, x, yy, px, 500, warna, 'center'); };
+      if (por) {
+        teks(c, 'Ajukan POSM', W / 2, 36 * u, 10.4 * u, 800, '#fff', 'center'); teks(c, 'cukup scan QR', W / 2, 47 * u, 10.4 * u, 800, '#FFC72A', 'center');
+        pil(c, W / 2 - 25 * u, 52 * u, 50 * u, 8 * u, '#fff', gud, 4.2 * u, '#0E7A44');
+        LANGKAH.forEach(function (l, i) {
+          var y = 64 * u + i * 7.9 * u; c.fillStyle = '#fff'; rr(c, 7 * u, y, 86 * u, 6.8 * u, 2 * u); c.fill(); c.fillStyle = l[2]; c.beginPath(); c.arc(12.4 * u, y + 3.4 * u, 2.5 * u, 0, 7); c.fill();
+          teks(c, String(i + 1), 12.4 * u, y + 4.5 * u, 3 * u, 800, l[3], 'center'); teks(c, l[0], 17.5 * u, y + 3 * u, 2.9 * u, 800, '#15283A'); teks(c, l[1], 17.5 * u, y + 5.7 * u, 2 * u, 500, '#5E7586');
+        });
+        var qy = 64 * u + 5 * 7.9 * u + 1.5 * u, qh = H - qy - 4 * u; c.save(); c.shadowColor = 'rgba(0,0,0,.28)'; c.shadowBlur = 2 * u; c.shadowOffsetY = .5 * u; c.fillStyle = '#fff'; rr(c, 7 * u, qy, 86 * u, qh, 3 * u); c.fill(); c.restore();
+        var qs = qh - 3 * u; kartuQr(c, 93 * u - qs - 1.5 * u, qy + 1.5 * u, qs, url);
+        teks(c, 'SCAN QR', 11 * u, qy + qh * 0.36, 8.6 * u, 800, '#0E7A44'); teks(c, 'Arahkan kamera HP ke kotak QR', 11 * u, qy + qh * 0.36 + 5.5 * u, 2.5 * u, 500, '#5E7586'); teks(c, gud, 11 * u, qy + qh - 4.5 * u, 3 * u, 800, '#0E7A44');
+      } else {
+        var cx2 = 7 * u; teks(c, 'Ajukan POSM', cx2, 36 * u, 9 * u, 800, '#fff'); teks(c, 'cukup scan QR', cx2, 46.5 * u, 9 * u, 800, '#FFC72A');
+        pil(c, cx2, 50 * u, 46 * u, 7 * u, '#fff', gud, 3.6 * u, '#0E7A44'); teks(c, 'Arahkan kamera HP ke kotak QR', cx2, 62 * u, 2.8 * u, 600, '#fff');
+        kartuQr(c, W - 7 * u - 36 * u, 20 * u, 36 * u, url);
+        LANGKAH.forEach(function (l, i) {
+          var cw = (W - 14 * u - 4 * 2 * u) / 5, x = 7 * u + i * (cw + 2 * u), y0 = 68 * u, hh = 26 * u; c.fillStyle = '#fff'; rr(c, x, y0, cw, hh, 2.6 * u); c.fill(); c.fillStyle = l[2]; c.beginPath(); c.arc(x + cw / 2, y0 + 5.6 * u, 3.8 * u, 0, 7); c.fill();
+          teks(c, String(i + 1), x + cw / 2, y0 + 7.2 * u, 4.4 * u, 800, l[3], 'center');
+          var tpx = 2.7 * u; c.font = '800 ' + tpx + 'px Poppins, system-ui, sans-serif'; while (c.measureText(l[0]).width > cw - 2.4 * u && tpx > 1.4 * u) { tpx -= 0.1 * u; c.font = '800 ' + tpx + 'px Poppins, system-ui, sans-serif'; }
+          teks(c, l[0], x + cw / 2, y0 + 14.4 * u, tpx, 800, '#15283A', 'center'); ks5(l[1], x + cw / 2, y0 + 18.6 * u, cw - 2.6 * u, 2 * u, 2.8 * u, '#5E7586');
+        });
+      }
     } else {
       teks(c, 'ALUR PENGAJUAN POSM', por ? W / 2 : 7 * u, por ? 29 * u : 29 * u, por ? 7.4 * u : 7.6 * u, 800, '#fff', por ? 'center' : 'left'); teks(c, gud + '  ·  Tanpa antre, tanpa kertas', por ? W / 2 : 7 * u, por ? 37 * u : 37 * u, 3.8 * u, 600, '#FFC72A', por ? 'center' : 'left');
       LANGKAH.forEach(function (l, i) {
@@ -1430,7 +1454,7 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
     var cv = $('pstCv'); if (!cv) return;
     Promise.all([loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js', 'qrcode'), muatLogo(), (document.fonts && document.fonts.load) ? Promise.all([document.fonts.load('800 80px Poppins'), document.fonts.load('600 40px Poppins')]).catch(function () { }) : 0]).then(function (r) { gambarPoster(cv, r[1]); }).catch(function () { toast('Gagal memuat pustaka QR. Periksa sinyal.'); });
   }
-  function posterBerkas(ext) { return 'POSKO-' + (PST.jenis === 'qr' ? 'QR' : 'ALUR') + '-' + PST.g + '-A3-' + PST.arah + '.' + ext; }
+  function posterBerkas(ext) { return 'POSKO-' + (PST.jenis === 'qr' ? 'QR' : PST.jenis === 'gab' ? 'QR-ALUR' : 'ALUR') + '-' + PST.g + '-A3-' + PST.arah + '.' + ext; }
   function unduh(blob, nama) { var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nama; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000); }
   function unduhPoster(fmt) {
     var cv = $('pstCv'); if (!cv || !cv.width) return;
@@ -1443,7 +1467,7 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
   function bukaPosterSheet() {
     var gl = S.me.gudangList, chipG = gl.length > 1 ? '<div class="pst-opt" style="grid-template-columns:repeat(' + gl.length + ',1fr)">' + gl.map(function (g) { return '<button type="button" class="chip' + (PST.g === g ? ' on' : '') + '" data-pg="' + g + '">' + esc(cap(g)) + '</button>'; }).join('') + '</div>' : '';
     openSheet('<h3>Poster QR · A3</h3><p class="help" style="margin:-6px 0 8px">Cetak lalu tempel di Gudang POSM. Pemohon cukup scan QR.</p>' + chipG +
-      '<div class="pst-opt"><button type="button" class="chip' + (PST.jenis === 'qr' ? ' on' : '') + '" data-pj="qr">Poster QR</button><button type="button" class="chip' + (PST.jenis === 'alur' ? ' on' : '') + '" data-pj="alur">Poster Alur</button></div>' +
+      '<div class="pst-opt" style="grid-template-columns:repeat(3,1fr)"><button type="button" class="chip' + (PST.jenis === 'gab' ? ' on' : '') + '" data-pj="gab">QR + Alur</button><button type="button" class="chip' + (PST.jenis === 'qr' ? ' on' : '') + '" data-pj="qr">QR saja</button><button type="button" class="chip' + (PST.jenis === 'alur' ? ' on' : '') + '" data-pj="alur">Alur saja</button></div>' +
       '<div class="pst-opt"><button type="button" class="chip' + (PST.arah === 'portrait' ? ' on' : '') + '" data-pa="portrait">Portrait</button><button type="button" class="chip' + (PST.arah === 'landscape' ? ' on' : '') + '" data-pa="landscape">Landscape</button></div>' +
       '<div class="pst-box"><canvas id="pstCv" class="pst-prev"></canvas></div><div class="pst-act"><button class="btn btn-pri" id="pstPdf" type="button">Unduh PDF A3</button><button class="btn btn-line" id="pstPng" type="button">Unduh PNG</button></div>' +
       '<button class="pst-ganti" id="pstGanti" type="button">Ganti QR gudang ' + esc(cap(PST.g)) + '…</button>');
