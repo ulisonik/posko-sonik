@@ -1708,7 +1708,7 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
     if (k === 'plus') { openPlus(); return; }
     closeSheet();
     if (k === 'home') { if (S.view === 'home') window.scrollTo({ top: 0, behavior: 'smooth' }); else show('home', { reset: true }); if (fromNav) filtersReset(); return; }
-    if (k === 'label') { show('stok'); toast('Ketuk barang untuk label satuan, atau "Ekspor label (Excel)" untuk banyak.'); return; }
+    if (k === 'label') { show('stok'); toast('Ketuk barang untuk label satuan, atau "Simpan label" untuk memilih banyak barang.'); return; }
     if (VIEWS[k]) { if (fromNav) { filtersReset(); show(k, { reset: true }); } else show(k); return; }
     if (k === 'program') { openProgram(); return; }
     if (k === 'laporan') { openLaporan(); return; }
@@ -1810,7 +1810,7 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
       ? '<span>🔎 ' + list.length + ' hasil untuk "' + esc(F.q.trim()) + '" (filter diabaikan saat mencari)</span>'
       : '<span>' + list.length + ' dari ' + all.length + ' barang · Gudang ' + esc(cap(g)) + '</span>' + (filtered ? '<button id="fReset">Reset filter</button>' : '');
     S.stokList = list;
-    if (list.length) $('stokNote').innerHTML += '<span style="display:flex;gap:12px"><button id="fExportStok">Laporan stok</button><button id="fExport">Ekspor label</button></span>';
+    if (list.length) $('stokNote').innerHTML += '<span style="display:flex;gap:12px"><button id="fExportStok">Laporan stok</button><button id="fExport">Simpan label</button></span>';
     var nn = (r.nonaktif || []).length;
     $('nonBtn').classList.toggle('hide', !nn); $('nonBtn').textContent = 'Barang nonaktif (' + nn + ')';
     if (!all.length) { $('items').innerHTML = '<div class="empty">Belum ada barang. Ketuk <b>+ Barang</b> untuk menambah.</div>'; return; }
@@ -2022,37 +2022,58 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
       if (canShare) $('xsShare').onclick = function () { navigator.share({ files: [file], title: name }).then(closeSheet).catch(function () {}); };
     }).catch(function () { toast('Gagal memuat pustaka Excel. Periksa sinyal.'); });
   }
+  /** Label NIIMBOT: pilih satu/beberapa/semua barang -> Excel (Kode batang <- Kode_Barang) atau gambar PNG (ZIP). */
   function exportLabels(list) {
     if (!list.length) { toast('Tidak ada barang untuk diekspor.'); return; }
-    loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', 'XLSX').then(function () {
-      var rows = list.map(function (it) { return { Kode_Barang: it.kode, Nama_Barang: it.nama, Kategori: it.kategori, Satuan: it.satuan }; });
-      var ws = XLSX.utils.json_to_sheet(rows);
-      ws['!cols'] = [{ wch: 12 }, { wch: 36 }, { wch: 20 }, { wch: 20 }];
-      var wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Label');
-      var d = new Date(), tg = d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2);
-      var name = 'label_POSKO_SONIK_' + tg + '.xlsx';
-      var blob = new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })], { type: XLSX_MIME });
-      var file = new File([blob], name, { type: XLSX_MIME });
-      var canShare = !!(navigator.canShare && navigator.canShare({ files: [file] }));
-      openSheet('<h3>Ekspor label (Excel)</h3>' +
-        '<p class="help" style="margin:-6px 0 14px">' + list.length + ' barang · kolom Kode_Barang, Nama_Barang, Kategori, Satuan. Di NIIMBOT: Sumber data → Unggah via Excel. Isi <b>Kode batang</b> dengan kolom <b>Kode_Barang</b> (bukan nama), dan teks nama dengan kolom <b>Nama_Barang</b>.</p>' +
-        '<button class="act" id="xSave"><span class="ic" style="background:var(--teal-xl);color:var(--teal)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg></span><span><b>Simpan ke HP</b><small>File lokal (folder Download)</small></span></button>' +
-        (canShare ? '<button class="act" id="xShare"><span class="ic" style="background:var(--green-l);color:var(--green)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 8.5 12 4l4.5 4.5M5 14v5h14v-5"/></svg></span><span><b>Bagikan</b><small>Ke WhatsApp atau aplikasi lain</small></span></button>' : '<p class="help">Bagikan langsung tidak didukung di perangkat ini. Pakai Simpan ke HP, lalu kirim file lewat WhatsApp.</p>') +
-        '<div class="lbl-h" style="margin-top:16px">Alternatif: gambar label</div>' +
-        '<button class="act" id="xZip"><span class="ic" style="background:#FFC72A;color:#17304F"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16v12H4zM8 7V4h8v3M10 12h4"/></svg></span><span><b>Simpan gambar label (ZIP)</b><small>Satu gambar PNG per barang, ukuran <span id="xZipSz"></span>. Di NIIMBOT: Tambah → Gambar.</small></span></button>' +
-        '<div class="seg2" id="xZipPick" style="margin:-2px 0 12px"><button data-sz="40x20">40 × 20 mm</button><button data-sz="50x30">50 × 30 mm</button></div>');
-      var zsz = lblSizePref(), zpaint = function () { $('xZipSz').textContent = zsz.replace('x', ' × ') + ' mm'; [].forEach.call($('xZipPick').children, function (x) { x.classList.toggle('on', x.getAttribute('data-sz') === zsz); }); };
-      zpaint();
-      $('xZipPick').onclick = function (ev) { var b = ev.target.closest('[data-sz]'); if (!b) return; zsz = b.getAttribute('data-sz'); try { localStorage.setItem('ms_lbl_sz', zsz); } catch (e) { } zpaint(); };
-      $('xZip').onclick = function () { simpanLabelZip(list, zsz); };
-      $('xSave').onclick = function () {
-        var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
-        closeSheet(); toast('Tersimpan: ' + name);
-      };
-      if (canShare) $('xShare').onclick = function () { navigator.share({ files: [file], title: name }).then(closeSheet).catch(function () {}); };
-    }).catch(function () { toast('Gagal memuat pustaka Excel. Periksa sinyal.'); });
+    var sel = {}, q = '', zsz = lblSizePref();
+    list.forEach(function (it) { sel[it.kode] = true; });
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', 'XLSX').catch(function () { });
+    openSheet('<h3>Simpan label barang</h3>' +
+      '<p class="help" style="margin:-6px 0 10px">Centang barang yang labelnya mau disimpan. Di NIIMBOT: Sumber data \u2192 Unggah via Excel, lalu isi <b>Kode batang</b> dengan kolom <b>Kode_Barang</b>.</p>' +
+      '<input type="search" id="lbQ" placeholder="Cari nama atau kode\u2026" style="margin-bottom:8px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin:2px 2px 6px"><b id="lbN" style="font-size:13px"></b><span style="display:flex;gap:14px"><button type="button" id="lbAll" class="lnk">Pilih semua</button><button type="button" id="lbNone" class="lnk">Kosongkan</button></span></div>' +
+      '<div id="lbList" style="max-height:34vh;overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff;margin-bottom:12px"></div>' +
+      '<button class="act" id="xSave"><span class="ic" style="background:var(--teal-xl);color:var(--teal)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg></span><span><b>Simpan Excel ke HP</b><small>Untuk impor di NIIMBOT (Sumber data)</small></span></button>' +
+      '<button class="act" id="xShare"><span class="ic" style="background:var(--green-l);color:var(--green)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 8.5 12 4l4.5 4.5M5 14v5h14v-5"/></svg></span><span><b>Bagikan Excel</b><small>Ke WhatsApp atau aplikasi lain</small></span></button>' +
+      '<div class="lbl-h" style="margin-top:14px">Atau simpan sebagai gambar label (nama + barcode)</div>' +
+      '<div class="seg2" id="xZipPick" style="margin-bottom:8px"><button data-sz="40x20">40 \u00D7 20 mm</button><button data-sz="50x30">50 \u00D7 30 mm</button></div>' +
+      '<button class="act" id="xZip"><span class="ic" style="background:#FFC72A;color:#17304F"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16v12H4zM8 7V4h8v3M10 12h4"/></svg></span><span><b id="xZipT">Simpan gambar (ZIP)</b><small>Satu PNG per barang. Di NIIMBOT: Tambah \u2192 Gambar.</small></span></button>');
+    var pilih = function () { return list.filter(function (it) { return sel[it.kode]; }); };
+    var tampil = function () { var k = q.toLowerCase(); return list.filter(function (it) { return !k || (it.nama + ' ' + it.kode).toLowerCase().indexOf(k) >= 0; }); };
+    var paint = function () {
+      var t = tampil(), n = pilih().length;
+      $('lbList').innerHTML = t.length ? t.map(function (it) {
+        return '<label style="display:flex;gap:10px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer"><input type="checkbox" data-k="' + esc(it.kode) + '"' + (sel[it.kode] ? ' checked' : '') + ' style="width:20px;height:20px;flex:none;accent-color:#1A8A4A"><span style="min-width:0"><b style="font-size:13px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(it.nama) + '</b><small style="color:var(--muted)">' + esc(it.kode) + ' \u00B7 ' + esc(it.kategori) + '</small></span></label>';
+      }).join('') : '<div class="empty" style="padding:16px">Tidak ada barang yang cocok.</div>';
+      $('lbN').textContent = n + ' dari ' + list.length + ' dipilih';
+      ['xSave', 'xShare', 'xZip'].forEach(function (id) { $(id).disabled = !n; $(id).style.opacity = n ? '' : '.5'; });
+      $('xZipT').textContent = 'Simpan ' + n + ' gambar (ZIP)';
+      [].forEach.call($('xZipPick').children, function (x) { x.classList.toggle('on', x.getAttribute('data-sz') === zsz); });
+    };
+    paint();
+    $('lbQ').oninput = function () { q = this.value; paint(); };
+    $('lbList').onchange = function (ev) { var c = ev.target.closest('[data-k]'); if (!c) return; sel[c.getAttribute('data-k')] = c.checked; paint(); };
+    $('lbAll').onclick = function () { tampil().forEach(function (it) { sel[it.kode] = true; }); paint(); };
+    $('lbNone').onclick = function () { tampil().forEach(function (it) { sel[it.kode] = false; }); paint(); };
+    $('xZipPick').onclick = function (ev) { var b = ev.target.closest('[data-sz]'); if (!b) return; zsz = b.getAttribute('data-sz'); try { localStorage.setItem('ms_lbl_sz', zsz); } catch (e) { } paint(); };
+    $('xZip').onclick = function () { var p = pilih(); if (p.length) simpanLabelZip(p, zsz); };
+    var buatExcel = function () {
+      return loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', 'XLSX').then(function () {
+        var rows = pilih().map(function (it) { return { Kode_Barang: it.kode, Nama_Barang: it.nama, Kategori: it.kategori, Satuan: it.satuan }; });
+        var ws = XLSX.utils.json_to_sheet(rows); ws['!cols'] = [{ wch: 12 }, { wch: 36 }, { wch: 20 }, { wch: 20 }];
+        var wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Label');
+        var d = new Date(), tg = d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2), name = 'label_POSKO_SONIK_' + tg + '.xlsx';
+        var blob = new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })], { type: XLSX_MIME });
+        return { name: name, blob: blob, file: new File([blob], name, { type: XLSX_MIME }), n: rows.length };
+      });
+    };
+    $('xSave').onclick = function () { buatExcel().then(function (x) { unduhBlob(x.blob, x.name); closeSheet(); toast('Tersimpan: ' + x.name + ' (' + x.n + ' barang)'); }).catch(function () { toast('Gagal memuat pustaka Excel. Periksa sinyal.'); }); };
+    $('xShare').onclick = function () {
+      buatExcel().then(function (x) {
+        if (navigator.canShare && navigator.canShare({ files: [x.file] })) navigator.share({ files: [x.file], title: x.name }).then(closeSheet).catch(function () { });
+        else { unduhBlob(x.blob, x.name); toast('Bagikan tidak didukung di sini. File disimpan: ' + x.name); }
+      }).catch(function () { toast('Gagal memuat pustaka Excel. Periksa sinyal.'); });
+    };
   }
   var SCRIPTS = {};
   function loadScript(src, globalName) {
