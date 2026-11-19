@@ -1,8 +1,8 @@
 /* POSKO SONIK - server tiruan untuk PRATINJAU (?demo=1 atau API_URL kosong). Data CONTOH, bukan data nyata.
    Kode contoh POSKO SONIK: ADMIN-000000 (admin pusat, semua gudang), SORONG-111111 (Admin Sorong), NABIRE-222222 (Admin Nabire). Tidak ada peran petugas.
    Halaman pengajuan: ambil.html?demo=1&k=DEMO-SORONG-0000000 (atau DEMO-NABIRE-0000000).
-   Data contoh disimpan di localStorage HP/laptop ini (kunci ms_demo_v8) agar ambil.html & index.html berbagi data.
-   Hapus: localStorage.removeItem('ms_demo_v8'). */
+   Data contoh disimpan di localStorage HP/laptop ini (kunci ms_demo_v9) agar ambil.html & index.html berbagi data.
+   Hapus: localStorage.removeItem('ms_demo_v9'). */
 (function () {
   var AKSES = {
     'ADMIN-000000': { nama: 'Admin Pusat', peran: 'ADMIN', gudang: 'SEMUA', gudangList: ['SORONG', 'NABIRE'] },
@@ -16,7 +16,7 @@
   var KEMASAN = ['PACK', 'KOLI', 'KARTON / BOX', 'PETI', 'LUSIN', 'IKAT'];
   var ALASAN = ['RUSAK', 'HILANG', 'SELISIH HITUNG', 'TIDAK DIPAKAI / DIMUSNAHKAN', 'LAINNYA'];
   var JABATAN = ['DSR / Salesman', 'MD / Merchandiser', 'DSS / Supervisor', 'AASM', 'Lainnya'];
-  var BATAS = 10, KEY = 'ms_demo_v8';
+  var BATAS = 10, KEY = 'ms_demo_v9';
 
   function iso(daysAgo) { var d = new Date(Date.now() - daysAgo * 86400000); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
   function ymd(s) { return s.replace(/-/g, ''); }
@@ -39,16 +39,21 @@
       ],
       TRX: [
         { id: 'MSK-SOQ-' + ymd(iso(6)) + '-1', jenis: 'masuk', tanggal: iso(6), waktu: iso(6) + 'T09:12', gudang: 'SORONG', sumber: 'UNILEVER', checker: 'Gerson', oleh: 'Gerson', status: 'AKTIF', items: [{ kode: 'SOQ001', jumlah: 100 }, { kode: 'SOQ002', jumlah: 100, kms: { kemasan: 'KOLI', isi: 20, qty: 5 } }, { kode: 'SOQ005', jumlah: 200, kms: { kemasan: 'PACK', isi: 50, qty: 4 } }] },
-        { id: 'SJ-SOQ-' + ymd(iso(4)) + '-1', jenis: 'keluar', tanggal: iso(4), waktu: iso(4) + 'T13:40', gudang: 'SORONG', menyerahkan: 'Gerson', menerima: 'Dorteis (DSR)', catatan: 'Untuk outlet rute Senin', oleh: 'Gerson', status: 'AKTIF', items: [{ kode: 'SOQ001', jumlah: 10, sebelum: 100, setelah: 90 }, { kode: 'SOQ002', jumlah: 20, sebelum: 100, setelah: 80 }, { kode: 'SOQ005', jumlah: 30, sebelum: 200, setelah: 170 }] },
-        { id: 'SJ-SOQ-' + ymd(iso(2)) + '-2', jenis: 'keluar', tanggal: iso(2), waktu: iso(2) + 'T10:05', gudang: 'SORONG', menyerahkan: 'Gerson', menerima: 'Stefanus (DSR)', catatan: '', oleh: 'Gerson', status: 'AKTIF', items: [{ kode: 'SOQ001', jumlah: 10, sebelum: 90, setelah: 80 }, { kode: 'SOQ002', jumlah: 10, sebelum: 80, setelah: 70 }] },
+        { id: 'SJ-SOQ-' + ymd(iso(4)) + '-1', jenis: 'keluar', tanggal: iso(4), waktu: iso(4) + 'T13:40', gudang: 'SORONG', menyerahkan: 'Gerson', menerima: 'Dorteis (DSR)', catatan: 'Untuk outlet rute Senin', outlet: 'TOKO SINAR JAYA', program: 'PROMO PEPSODENT', jabatanPenerima: 'DSR / Salesman', oleh: 'Gerson', status: 'AKTIF', items: [{ kode: 'SOQ001', jumlah: 10, sebelum: 100, setelah: 90 }, { kode: 'SOQ002', jumlah: 20, sebelum: 100, setelah: 80 }, { kode: 'SOQ005', jumlah: 30, sebelum: 200, setelah: 170 }] },
+        { id: 'SJ-SOQ-' + ymd(iso(2)) + '-2', jenis: 'keluar', tanggal: iso(2), waktu: iso(2) + 'T10:05', gudang: 'SORONG', menyerahkan: 'Gerson', menerima: 'Stefanus (DSR)', catatan: '', outlet: 'KIOS MAMA ANI', program: 'LAUNCHING RINSO', jabatanPenerima: 'DSR / Salesman', oleh: 'Gerson', status: 'AKTIF', items: [{ kode: 'SOQ001', jumlah: 10, sebelum: 90, setelah: 80 }, { kode: 'SOQ002', jumlah: 10, sebelum: 80, setelah: 70 }] },
         { id: 'MSK-NBX-' + ymd(iso(3)) + '-1', jenis: 'masuk', tanggal: iso(3), waktu: iso(3) + 'T08:30', gudang: 'NABIRE', sumber: 'UNILEVER', checker: 'Stevan', oleh: 'Stevan', status: 'AKTIF', items: [{ kode: 'NBX001', jumlah: 1000, kms: { kemasan: 'KOLI', isi: 20, qty: 50 } }, { kode: 'NBX002', jumlah: 50 }] }
       ],
       PMT: [
-        { id: 'PMT-SOQ-' + ymd(iso(3)) + '-1', waktu: iso(3) + 'T16:20', gudang: 'SORONG', nama: 'Dorteis', jabatan: 'DSR / Salesman', hp: '081234500001', keperluan: 'Pasang di Toko Sinar Jaya', catatan: '', status: 'MENUNGGU', items: [{ kode: 'SOQ005', minta: 50, setuju: null }, { kode: 'SOQ001', minta: 5, setuju: null }] },
+        { id: 'PMT-SOQ-' + ymd(iso(3)) + '-1', waktu: iso(3) + 'T16:20', gudang: 'SORONG', nama: 'Dorteis', jabatan: 'DSR / Salesman', hp: '081234500001', keperluan: 'Pasang di Toko Sinar Jaya', program: 'PROMO PEPSODENT', catatan: '', status: 'MENUNGGU', items: [{ kode: 'SOQ005', minta: 50, setuju: null }, { kode: 'SOQ001', minta: 5, setuju: null }] },
         { id: 'PMT-SOQ-' + ymd(iso(0)) + '-2', waktu: iso(0) + 'T08:05', gudang: 'SORONG', nama: 'Yohanis', jabatan: 'MD / Merchandiser', hp: '081234500002', keperluan: 'Display Pepsodent outlet rute Jumat', catatan: 'Ambil pagi', status: 'MENUNGGU', items: [{ kode: 'SOQ004', minta: 10, setuju: null }] },
         { id: 'PMT-SOQ-' + ymd(iso(1)) + '-3', waktu: iso(1) + 'T10:00', gudang: 'SORONG', nama: 'Glenn', jabatan: 'DSR / Salesman', hp: '081234500004', keperluan: 'Program Pepsodent pasar', catatan: '', status: 'DISETUJUI', diprosesOleh: 'Gerson', waktuProses: iso(1) + 'T11:00', items: [{ kode: 'SOQ006', minta: 10, setuju: 10 }] },
         { id: 'PMT-SOQ-' + ymd(iso(5)) + '-4', waktu: iso(5) + 'T09:00', gudang: 'SORONG', nama: 'Hendra', jabatan: 'MD / Merchandiser', hp: '081234500005', keperluan: 'Pasang hanger', catatan: '', status: 'DISETUJUI', diprosesOleh: 'Gerson', waktuProses: iso(5) + 'T10:00', items: [{ kode: 'SOQ004', minta: 2, setuju: 2 }] },
         { id: 'PMT-NBX-' + ymd(iso(0)) + '-1', waktu: iso(0) + 'T09:10', gudang: 'NABIRE', nama: 'Theo', jabatan: 'DSR / Salesman', hp: '081234500003', keperluan: 'Outlet baru Pasar Karang', catatan: '', status: 'MENUNGGU', items: [{ kode: 'NBX001', minta: 20, setuju: null }] }
+      ],
+      PROG: [
+        { id: 'PRG-SOQ-1', nama: 'PROMO PEPSODENT', gudang: 'SORONG', aktif: true, kodes: ['SOQ001', 'SOQ004', 'SOQ006'] },
+        { id: 'PRG-SOQ-2', nama: 'LAUNCHING RINSO', gudang: 'SORONG', aktif: true, kodes: ['SOQ005', 'SOQ002'] },
+        { id: 'PRG-NBX-1', nama: 'PROMO PEPSODENT', gudang: 'NABIRE', aktif: true, kodes: ['NBX001', 'NBX003'] }
       ],
       NO: { MSK: { SORONG: 1, NABIRE: 1 }, SJ: { SORONG: 2, NABIRE: 0 }, BTL: { SORONG: 0, NABIRE: 0 }, PMT: { SORONG: 4, NABIRE: 1 }, ADJ: { SORONG: 0, NABIRE: 0 }, OPN: { SORONG: 0, NABIRE: 0 } }
     };
@@ -56,11 +61,12 @@
   var D;
   try { D = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { D = null; }
   if (!D || !D.BARANG) D = awal();
+  if (!D.PROG) D.PROG = awal().PROG;
   function simpan() { try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { /* penuh: abaikan */ } }
   simpan();
 
   function bar(kode) { return D.BARANG.filter(function (x) { return x.kode === kode; })[0]; }
-  function sat(b, o) { o = o || {}; o.satuan = b.satuan; o.kemasan = b.isi > 1 ? b.kemasan : ''; o.isi = b.isi > 1 ? b.isi : 0; return o; }
+  function sat(b, o) { o = o || {}; o.batas = b.batas || 0; o.satuan = b.satuan; o.kemasan = b.isi > 1 ? b.kemasan : ''; o.isi = b.isi > 1 ? b.isi : 0; return o; }
   function pick(gl, s) { var o = {}; gl.forEach(function (g) { o[g] = s[g] || 0; }); return o; }
   /* Master barang per gudang (user 13 Nov): SOQ001 Sorong, NBX001 Nabire. */
   function pre(g) { return g === 'SORONG' ? 'SOQ' : 'NBX'; }
@@ -83,11 +89,12 @@
   function beranda(me) {
     var per = {};
     me.gudangList.forEach(function (g) {
-      var pg = { habis: 0, menipis: 0, menunggu: D.PMT.filter(function (p) { return p.gudang === g && p.status === 'MENUNGGU'; }).length, peringatan: [] };
+      var pg = { habis: 0, menipis: 0, menunggu: D.PMT.filter(function (p) { return p.gudang === g && p.status === 'MENUNGGU'; }).length, lama: 0, siapSerah: 0, siapLama: 0, peringatan: [] };
+      D.PMT.forEach(function (p) { if (p.gudang !== g) return; var lm = pmtOut(p, false).lama; if (p.status === 'MENUNGGU' && lm) pg.lama++; if (p.status === 'DISETUJUI') { pg.siapSerah++; if (lm) pg.siapLama++; } });
       milik([g]).forEach(function (b) {
         var n = b.stok[g] || 0;
         if (n <= 0) { pg.habis++; pg.peringatan.push({ kode: b.kode, nama: b.nama, satuan: b.satuan, stok: n, level: 'habis' }); }
-        else if (n <= BATAS) { pg.menipis++; pg.peringatan.push({ kode: b.kode, nama: b.nama, satuan: b.satuan, stok: n, level: 'menipis' }); }
+        else if (n <= (b.batas > 0 ? b.batas : BATAS)) { pg.menipis++; pg.peringatan.push({ kode: b.kode, nama: b.nama, satuan: b.satuan, stok: n, level: 'menipis' }); }
       });
       var cc = cad(); pg.kurangCadangan = milik([g]).filter(function (b) { return !b.nonaktif && (cc[b.kode + '|' + g] || 0) > (b.stok[g] || 0); }).map(function (b) { return { kode: b.kode, nama: b.nama, satuan: b.satuan, stok: b.stok[g] || 0, dipesan: cc[b.kode + '|' + g] }; });
       pg.peringatan.sort(function (a, b) { return a.stok - b.stok; });
@@ -111,7 +118,7 @@
     if (me.gudangList.indexOf(d.gudang) < 0) return gagal('Anda tidak punya akses ke gudang ' + d.gudang + '.');
     var g = D.BARANG.filter(function (b) { return b.gudang === d.gudang && b.nama === nama; })[0];
     if (g) return gagal('Nama ini sudah terdaftar sebagai ' + g.kode + '.');
-    var b = { kode: kodeBerikut(d.gudang), gudang: d.gudang, nama: nama, kategori: d.kategori, satuan: d.satuan, kemasan: d.kemasan || '', isi: d.kemasan ? d.isi : 0, foto: 'data:' + d.foto.mime + ';base64,' + d.foto.base64, stok: {} };
+    var b = { kode: kodeBerikut(d.gudang), gudang: d.gudang, nama: nama, kategori: d.kategori, satuan: d.satuan, kemasan: d.kemasan || '', isi: d.kemasan ? d.isi : 0, batas: Number(d.batas) > 0 ? Math.floor(Number(d.batas)) : 0, foto: 'data:' + d.foto.mime + ';base64,' + d.foto.base64, stok: {} };
     b.stok[d.gudang] = 0;
     D.BARANG.push(b); simpan();
     return { ok: true, item: sat(b, { kode: b.kode, gudang: b.gudang, nama: b.nama, kategori: b.kategori, foto: b.foto, stok: pick([b.gudang], b.stok) }) };
@@ -146,7 +153,7 @@
     });
     var no = nomor(keluar ? 'SJ' : 'MSK', d.gudang, d.tanggal);
     var t = { id: no, jenis: keluar ? 'keluar' : 'masuk', tanggal: d.tanggal, waktu: now(), gudang: d.gudang, oleh: me.nama, status: 'AKTIF', items: rec, fotos: fts.map(function (f) { return 'data:' + f.mime + ';base64,' + f.base64; }) };
-    if (keluar) { t.menyerahkan = d.menyerahkan; t.menerima = d.menerima; t.jabatanPenerima = d.jabatanPenerima || ''; t.catatan = d.catatan; t.ttd = 'data:image/png;base64,' + d.ttd.base64; t.idPermintaan = d.idPermintaan || ''; }
+    if (keluar) { t.outlet = String(d.outlet || (p ? p.keperluan : '') || '').slice(0, 120); t.program = String(d.program || (p ? p.program : '') || '').slice(0, 60); t.menyerahkan = d.menyerahkan; t.menerima = d.menerima; t.jabatanPenerima = d.jabatanPenerima || ''; t.catatan = d.catatan; t.ttd = 'data:image/png;base64,' + d.ttd.base64; t.idPermintaan = d.idPermintaan || ''; }
     else { t.sumber = d.sumber; t.checker = d.checker; }
     D.TRX.unshift(t);
     if (p) { p.status = 'DISERAHKAN'; p.idKeluar = no; p.waktuSerah = now(); }
@@ -174,7 +181,7 @@
     if (t.jenis === 'adj') return { id: t.id, jenis: 'adj', sub: t.sub, tanggal: t.tanggal, waktu: t.waktu, gudang: t.gudang, pihak: t.alasan, petugas: t.oleh, oleh: t.oleh, status: t.status,
       items: t.items.map(function (i) { var b = bar(i.kode); return sat(b, { kode: i.kode, nama: b.nama, jumlah: i.jumlah }); }) };
     return { id: t.id, jenis: t.jenis, tanggal: t.tanggal, waktu: t.waktu, gudang: t.gudang, pihak: t.jenis === 'masuk' ? (t.sumber || '') : t.menerima + (t.jabatanPenerima ? ' · ' + t.jabatanPenerima : ''),
-      petugas: t.jenis === 'masuk' ? t.checker : t.menyerahkan, oleh: t.oleh, status: t.status,
+      petugas: t.jenis === 'masuk' ? t.checker : t.menyerahkan, oleh: t.oleh, status: t.status, outlet: t.outlet || '', program: t.program || '',
       items: t.items.map(function (i) { var b = bar(i.kode); return sat(b, { kode: i.kode, nama: b.nama, jumlah: i.jumlah }); }) };
   }
   function urut(a, b) { return (b.tanggal + b.waktu) < (a.tanggal + a.waktu) ? -1 : 1; }
@@ -228,7 +235,7 @@
   }
   function pmtOut(p, withStok) {
     var c = withStok ? cad() : null;
-    return { id: p.id, waktu: p.waktu, gudang: p.gudang, nama: p.nama, jabatan: p.jabatan, hp: p.hp, keperluan: p.keperluan, catatan: p.catatan || '', status: p.status,
+    return { id: p.id, waktu: p.waktu, gudang: p.gudang, nama: p.nama, jabatan: p.jabatan, hp: p.hp, keperluan: p.keperluan, program: p.program || '', catatan: p.catatan || '', status: p.status,
       diprosesOleh: p.diprosesOleh || '', waktuProses: p.waktuProses || '', alasanTolak: p.alasanTolak || '', idKeluar: p.idKeluar || '', waktuSerah: p.waktuSerah || '',
       batasAmbil: p.status === 'DISETUJUI' && KDL > 0 ? addHari(p.waktuProses, KDL) : '', lama: (p.status === 'MENUNGGU' && umur(p.waktu) > 2) || (p.status === 'DISETUJUI' && umur(p.waktuProses) > 7),
       items: p.items.map(function (i) {
@@ -265,6 +272,24 @@
     return { ok: true, id: p.id };
   }
 
+  function laporan(me, d) {
+    var g = d.gudang; if (!boleh(me, g)) return gagal('Anda tidak punya akses ke gudang ' + g + '.');
+    var bln = d.bulan || iso(0).slice(0, 7), pB = {}, pJ = {}, pT = {}, pP = {}, pO = {}, nK = 0, tK = 0, nM = 0, tM = 0;
+    var add = function (m, k, n) { if (k) m[k] = (m[k] || 0) + n; };
+    D.TRX.forEach(function (t) {
+      if (t.gudang !== g || t.status === 'DIBATALKAN' || String(t.tanggal).slice(0, 7) !== bln) return;
+      var j = t.items.reduce(function (a, i) { return a + i.jumlah; }, 0);
+      if (t.jenis === 'masuk') { nM++; tM += j; }
+      else if (t.jenis === 'keluar') { nK++; tK += j; t.items.forEach(function (i) { var b = bar(i.kode); add(pB, b.nama + ' (' + b.satuan + ')', i.jumlah); }); add(pJ, t.jabatanPenerima || '(tanpa jabatan)', j); add(pT, t.menerima, j); add(pP, t.program || '(tanpa program)', j); add(pO, t.outlet || '(tanpa outlet)', j); }
+    });
+    var st = { total: 0, DISERAHKAN: 0, DITOLAK: 0, DIBATALKAN: 0, MENUNGGU: 0, DISETUJUI: 0, KEDALUWARSA: 0 };
+    D.PMT.forEach(function (p) { if (p.gudang === g && String(p.waktu).slice(0, 7) === bln) { st.total++; st[p.status] = (st[p.status] || 0) + 1; } });
+    var baru = {}; D.TRX.forEach(function (t) { if (t.gudang === g && t.jenis === 'keluar' && t.status !== 'DIBATALKAN' && t.tanggal >= iso(60)) t.items.forEach(function (i) { baru[i.kode] = 1; }); });
+    var diam = milik([g]).filter(function (b) { return !b.nonaktif && (b.stok[g] || 0) > 0 && !baru[b.kode]; }).map(function (b) { return { kode: b.kode, nama: b.nama, satuan: b.satuan, stok: b.stok[g] }; }).sort(function (a, b) { return b.stok - a.stok; });
+    var us = function (m, n) { return Object.keys(m).map(function (k) { return { nama: k, jumlah: m[k] }; }).sort(function (a, b) { return b.jumlah - a.jumlah; }).slice(0, n || 10); };
+    return { ok: true, gudang: g, bulan: bln, hariDiam: 60, keluar: { transaksi: nK, jumlah: tK }, masuk: { transaksi: nM, jumlah: tM }, perBarang: us(pB, 15), perJabatan: us(pJ), perPenerima: us(pT), perProgram: us(pP), perOutlet: us(pO), pengajuan: st, rataHariSerah: st.DISERAHKAN ? 1.5 : null, tidakBergerak: diam.slice(0, 20), tidakBergerakTotal: diam.length };
+  }
+
   window.MS_DEMO = function (aksi, kode, data) {
     return new Promise(function (res) {
       setTimeout(function () {
@@ -275,7 +300,7 @@
           masuk: function () { return { ok: true, nama: me.nama, peran: me.peran, gudang: me.gudang, gudangList: me.gudangList, kategori: KATEGORI, satuan: SATUAN, kemasan: KEMASAN, alasanPenyesuaian: ALASAN, versi: 'v0.7 (pratinjau)' }; },
           barangUbah: function () {
             var b = bar(data.kode); if (!b) return gagal('Barang tidak ditemukan.');
-            b.nama = String(data.nama || b.nama).toUpperCase(); b.kategori = data.kategori; b.satuan = data.satuan; b.kemasan = data.kemasan || ''; b.isi = data.kemasan ? data.isi : 0;
+            b.nama = String(data.nama || b.nama).toUpperCase(); b.kategori = data.kategori; b.satuan = data.satuan; b.kemasan = data.kemasan || ''; b.isi = data.kemasan ? data.isi : 0; b.batas = Number(data.batas) > 0 ? Math.floor(Number(data.batas)) : 0;
             if (data.foto) b.foto = 'data:' + data.foto.mime + ';base64,' + data.foto.base64; simpan(); return { ok: true, kode: b.kode };
           },
           barangAktif: function () {
@@ -283,6 +308,18 @@
             if (!data.aktif && (b.stok.SORONG > 0 || b.stok.NABIRE > 0)) return gagal('Masih ada stok. Kosongkan dulu lewat Stock Keluar atau Penyesuaian.');
             b.nonaktif = !data.aktif; simpan(); return { ok: true, kode: b.kode, aktif: !!data.aktif };
           },
+          programList: function () { return { ok: true, items: D.PROG.filter(function (p) { return boleh(me, p.gudang); }) }; },
+          programSimpan: function () {
+            if (!boleh(me, data.gudang)) return gagal('Anda tidak punya akses ke gudang ' + data.gudang + '.');
+            var nm = String(data.nama || '').toUpperCase().replace(/\s+/g, ' ').trim(); if (!nm) return gagal('Nama program wajib diisi.');
+            var kembar = D.PROG.filter(function (p) { return p.gudang === data.gudang && p.id !== data.id && p.nama === nm; })[0]; if (kembar) return gagal('Nama program ini sudah ada.');
+            var ks = (data.kodes || []).filter(function (k) { var b = bar(k); return b && b.gudang === data.gudang; });
+            var p = data.id ? D.PROG.filter(function (x) { return x.id === data.id; })[0] : null;
+            if (p) { p.nama = nm; p.kodes = ks; } else { p = { id: 'PRG-' + pre(data.gudang) + '-' + Date.now().toString(36), nama: nm, gudang: data.gudang, aktif: true, kodes: ks }; D.PROG.push(p); }
+            simpan(); return { ok: true, id: p.id };
+          },
+          programAktif: function () { var p = D.PROG.filter(function (x) { return x.id === data.id; })[0]; if (!p) return gagal('Program tidak ditemukan.'); p.aktif = !!data.aktif; simpan(); return { ok: true, id: p.id, aktif: p.aktif }; },
+          laporan: function () { return laporan(me, data); },
           thumbs: function () { return { ok: true, thumbs: {} }; },
           linkPengajuan: function () { var t = {}; me.gudangList.forEach(function (g) { t[g] = TOKENG[g]; }); return { ok: true, token: t }; },
           gantiToken: function () {
@@ -308,7 +345,7 @@
         var g = TOKEN[token];
         if (!g) return res({ ok: false, tokenFail: true, error: 'Link pengajuan tidak berlaku. Minta link/QR terbaru ke admin gudang.' });
         d = d || {};
-        if (aksi === 'pubKatalog') return res({ ok: true, gudang: g, kategori: KATEGORI, jabatan: JABATAN,
+        if (aksi === 'pubKatalog') return res({ ok: true, gudang: g, kategori: KATEGORI, jabatan: JABATAN, program: D.PROG.filter(function (p) { return p.gudang === g && p.aktif; }).map(function (p) { return { id: p.id, nama: p.nama, kodes: p.kodes }; }),
           items: (function () { var c = cad(); return milik([g]).filter(function (b) { return !b.nonaktif; }).map(function (b) { return sat(b, { kode: b.kode, nama: b.nama, kategori: b.kategori, foto: b.foto, stok: tersedia(b.kode, g, c) }); }); })().sort(function (a, b) { return a.nama < b.nama ? -1 : 1; }) });
         if (aksi === 'pubAjukan') {
           if (!d.nama || !d.jabatan || hpB(d.hp).length < 9 || !d.keperluan) return res(gagal('Data pengambil belum lengkap.'));
@@ -317,7 +354,7 @@
           var kurang = d.items.filter(function (r) { var b = bar(r.kode); return !b || b.gudang !== g || r.jumlah > tersedia(r.kode, g, c0); });
           if (kurang.length) return res(gagal('Stok tidak cukup: ' + kurang.map(function (r) { var b = bar(r.kode); return (b ? b.nama : r.kode) + ' (tersedia ' + (b ? tersedia(r.kode, g, c0) : 0) + ')'; }).join('; ') + '. Kurangi jumlah di keranjang.'));
           var no = nomor('PMT', g, iso(0));
-          D.PMT.unshift({ id: no, waktu: now(), gudang: g, nama: d.nama, jabatan: d.jabatan, hp: hpB(d.hp), keperluan: d.keperluan, catatan: d.catatan || '', status: 'MENUNGGU', items: d.items.map(function (r) { return { kode: r.kode, minta: r.jumlah, setuju: null }; }) });
+          D.PMT.unshift({ id: no, waktu: now(), gudang: g, nama: d.nama, jabatan: d.jabatan, hp: hpB(d.hp), keperluan: d.keperluan, program: String(d.program || '').slice(0, 60), catatan: d.catatan || '', status: 'MENUNGGU', items: d.items.map(function (r) { return { kode: r.kode, minta: r.jumlah, setuju: null }; }) });
           simpan();
           return res({ ok: true, nomor: no });
         }

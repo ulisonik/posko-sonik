@@ -481,6 +481,7 @@
   .hdr .gd { font-size:13px; }
 </style>
 <style id="panduan">
+  .vid-pem { margin-bottom:12px; } .vid-pem video { width:100%; max-height:62vh; border-radius:12px; background:#0C1B2C; display:block; margin-top:6px; } .vid-dur { font-size:11px; font-weight:600; color:#5E7586; margin-left:6px; }
   /* ===== Panduan: hero, lini masa langkah, arti status, tanya-jawab ===== */
   .pg-hero { border-radius:20px; padding:16px 16px 14px; color:#fff; background:linear-gradient(160deg,#1A8A4A 0%,#0E7A44 55%,#006747 100%); box-shadow:0 6px 18px rgba(14,122,68,.25); margin-bottom:12px; }
   .pg-hero b { display:block; font-size:18px; line-height:1.2; }
@@ -530,6 +531,21 @@
   .hbk svg { width:26px; height:26px; stroke-width:2.6; }
   .hdr.adaback .row > img { display:none; }
 </style>
+<style id="rev11">
+#aktifBox{margin:0 0 10px}
+#aktifBox .ah{font-size:13px;font-weight:800;color:#15283A;margin:0 2px 6px}
+#aktifBox .ak{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:#fff;border:0;border-radius:14px;padding:10px 12px;margin-bottom:6px;box-shadow:0 1px 3px rgba(21,40,58,.08);font:inherit;color:#15283A;cursor:pointer}
+#aktifBox .ak .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+#aktifBox .ak b{font-size:13px}#aktifBox .ak small{font-size:12px;color:#5E7586}
+#aktifBox .ak .pl{flex:none;font-size:12px;font-weight:800;border-radius:12px;padding:4px 10px}
+#aktifBox .ak .pl.MENUNGGU{background:#FFF0E0;color:#B34A00}#aktifBox .ak .pl.DISETUJUI{background:#E3F3E8;color:#0E7A44}
+#fProg{margin:0 0 8px}
+#fProg .ph{font-size:12px;font-weight:700;color:#5E7586;margin:0 2px 6px}
+#fProg .pc2,.pchips{display:flex;gap:8px;flex-wrap:wrap}
+.pchips .chip,#fProg .chip{flex:none}
+.km.sr{color:#B34A00;font-weight:700}
+.okbtns{display:grid;gap:8px;margin-top:8px}
+</style>
 </head>
 <body>
 <header class="hdr">
@@ -557,6 +573,8 @@
     <input id="q" type="search" placeholder="Cari barang POSM" autocomplete="off">
     <button type="button" class="scan" data-go="scan" aria-label="Scan barcode"><svg class="i" viewBox="0 0 24 24"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3M8 9v6M11 9v6M14 9v6M16.5 9v6"/></svg></button>
   </label>
+  <div id="aktifBox" class="hide"></div>
+  <div id="fProg" class="hide"></div>
   <div id="fKat"></div>
   <div class="note" id="katNote"></div>
   <div class="grid" id="grid"></div>
@@ -583,6 +601,9 @@
     <div class="help">Dipakai untuk melacak status pengajuan.</div>
     <label class="fl" for="cPerlu">Keperluan / outlet <em>*</em></label>
     <input class="inp" id="cPerlu" maxlength="120" placeholder="Contoh: pasang di Toko Sinar Jaya">
+    <label class="fl">Program <span class="help" style="display:inline;margin:0">(opsional)</span></label>
+    <div class="pchips" id="cProg"></div>
+    <div class="help">Pilih bila pengajuan ini untuk program tertentu. Tidak ada? Biarkan kosong.</div>
     <label class="fl" for="cCat">Catatan</label>
     <textarea class="inp" id="cCat" maxlength="300" placeholder="Opsional"></textarea>
     <div class="err hide" id="cErr"></div>
@@ -607,6 +628,7 @@
     <div><b>Ambil POSM dalam 5 langkah</b><span>Tanpa antre. Tanpa kertas.</span></div>
     <div class="pg-flow"><i>Ajukan</i><u></u><i>Disetujui</i><u></u><i>Ambil</i></div>
   </section>
+  <section class="pg-card vid-pem" id="vidPem"><h4>Video panduan <span class="vid-dur">± 4 menit · bersuara</span></h4><video controls preload="none" playsinline poster="video/pemohon.jpg"><source src="video/pemohon.mp4" type="video/mp4"></video><p class="help" style="margin:8px 0 0">Ikuti langkahnya dari buka QR sampai ambil barang. Gunakan earphone bila di gudang ramai.</p></section>
   <div class="pg-grid">
     <section class="pg-card"><h4>Langkah demi langkah</h4><ol class="pg-steps"><li class="pg-step"><span class="pg-no">1</span><span class="pg-ic"><svg class="i" viewBox="0 0 24 24"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-3.5-3.5"/></svg></span><div class="pg-tx"><b>Pilih barang</b><span>Cari di <b>Katalog</b> atau <b>Scan</b> barcode di rak.</span></div></li><li class="pg-step"><span class="pg-no">2</span><span class="pg-ic"><svg class="i" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11.2a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L20 8H6.2M9 20.5h.01M17 20.5h.01"/></svg></span><div class="pg-tx"><b>Atur keranjang</b><span>Tentukan jumlah. Boleh <b>PCS</b> atau <b>kemasan</b>.</span></div></li><li class="pg-step"><span class="pg-no">3</span><span class="pg-ic"><svg class="i" viewBox="0 0 24 24"><path d="M5 4h10l4 4v12H5zM9 11h6M9 15h4"/></svg></span><div class="pg-tx"><b>Isi data &amp; ajukan</b><span>Nama, jabatan, No HP, keperluan. Tekan <b>Ajukan</b>.</span></div></li><li class="pg-step"><span class="pg-no">4</span><span class="pg-ic"><svg class="i" viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 1 0 17 8.5 8.5 0 0 1 0-17zM12 7.5V12l3 2"/></svg></span><div class="pg-tx"><b>Tunggu admin</b><span>Admin gudang memeriksa. Pantau di <b>Pesanan</b>.</span></div></li><li class="pg-step"><span class="pg-no">5</span><span class="pg-ic"><svg class="i" viewBox="0 0 24 24"><path d="M4 9l8-5 8 5v11H4zM9 20v-6h6v6"/></svg></span><div class="pg-tx"><b>Ambil di gudang</b><span>Status <b>Disetujui</b>? Datang, tanda tangan, bawa pulang.</span></div></li></ol></section>
     <div class="pg-col">
@@ -690,10 +712,16 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
   function deviceId() { var d = store('get', 'ms_dev'); if (!d) { d = 'd' + Math.random().toString(36).slice(2) + Date.now().toString(36); store('set', 'ms_dev', d); } return d; }
   var KEY_CART = 'ms_cart_' + TOKEN.slice(0, 12), KEY_OD = 'ms_od_' + TOKEN.slice(0, 12), KEY_ME = 'ms_pemohon';
 
+  /* Boleh dikirim ulang otomatis saat sinyal putus: pembacaan + pengajuan (server menolak ganda 2 menit). */
+  var AMAN_ULANG = { pubKatalog: 1, pubLacak: 1, pubThumbs: 1, pubAjukan: 1 };
   function api(aksi, data) {
     if (DEMO) return window.MS_DEMO_PUB ? window.MS_DEMO_PUB(aksi, TOKEN, data || {}) : Promise.reject(new Error('demo'));
-    return fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ aksi: aksi, token: TOKEN, deviceId: deviceId(), data: data || {} }) })
-      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+    var coba = function (n) {
+      return fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ aksi: aksi, token: TOKEN, deviceId: deviceId(), data: data || {} }) })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .catch(function (e) { if (AMAN_ULANG[aksi] && n < 2) return new Promise(function (ok) { setTimeout(ok, 1000 * (n + 1)); }).then(function () { return coba(n + 1); }); throw e; });
+    };
+    return coba(0);
   }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function cap(s) { s = String(s || '').toLowerCase(); return s.charAt(0).toUpperCase() + s.slice(1); }
@@ -791,11 +819,37 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
       $('gdName').textContent = 'Gudang ' + cap(r.gudang);
       $('hdrSub').textContent = 'Pengajuan POSM · Gudang ' + cap(r.gudang);
       document.title = 'POSKO SONIK · Gudang ' + cap(r.gudang);
-      cartClean(); paintKat(); paintCount(); fotoProbe();
+      cartClean(); paintProgChips(); paintKat(); paintCount(); fotoProbe(); loadAktif();
       if (S.view === 'keranjang') paintCart();
-    }).catch(function () { toast('Tidak tersambung. Periksa sinyal lalu muat ulang.'); $('grid').innerHTML = '<div class="empty" style="grid-column:1/-1">Tidak tersambung ke server.</div>'; });
+    }).catch(function () { toast('Sinyal putus. Data aman, coba lagi.'); $('grid').innerHTML = '<div class="empty" style="grid-column:1/-1">Sinyal putus. Ketuk muat ulang halaman.</div>'; });
   }
   try { S.vm = localStorage.getItem('ms_vm') || 'grid'; } catch (x) { S.vm = 'grid'; }
+  S.prog = '';
+  function paintProgChips() {
+    var l = (S.kat && S.kat.program) || [];
+    var chips = function (cls) { return l.map(function (p) { return '<button type="button" class="chip' + (S.prog === p.nama ? ' on' : '') + '" data-prog="' + esc(p.nama) + '">' + esc(p.nama) + '</button>'; }).join(''); };
+    $('fProg').classList.toggle('hide', !l.length);
+    $('fProg').innerHTML = l.length ? '<div class="ph">Program (POSM program tampil paling atas)</div><div class="pc2">' + chips() + '</div>' : '';
+    $('cProg').innerHTML = l.length ? chips() : '<span class="help" style="margin:0">Belum ada program aktif.</span>';
+  }
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-prog]'); if (!b) return;
+    var x = b.getAttribute('data-prog'); S.prog = S.prog === x ? '' : x; paintProgChips(); paintKat();
+  });
+  /* Pesanan aktif saya (di atas katalog) */
+  function loadAktif() {
+    var od = jget(KEY_OD, []);
+    if (!od.length) { $('aktifBox').classList.add('hide'); return; }
+    api('pubLacak', { list: od.slice(0, 10).map(function (o) { return { id: o.id, hp: o.hp }; }) }).then(function (r) {
+      if (!r.ok) return;
+      S.od = r.items; var a = r.items.filter(function (p) { return AKTIF[p.status]; });
+      $('aktifBox').classList.toggle('hide', !a.length);
+      $('aktifBox').innerHTML = a.length ? '<div class="ah">Pesanan aktif saya</div>' + a.slice(0, 3).map(function (p) {
+        return '<button class="ak" data-od="' + esc(p.id) + '"><span class="tx"><b>' + esc(p.id) + '</b><small>' + p.items.length + ' barang · ' + esc(p.keperluan || '') + '</small></span><span class="pl ' + p.status + '">' + (p.status === 'DISETUJUI' ? 'Siap diambil' : 'Menunggu') + '</span></button>';
+      }).join('') + (a.length > 3 ? '<button class="lnk" data-go="pesanan" style="margin:0 2px">Lihat semua (' + a.length + ')</button>' : '') : '';
+    }).catch(function () {});
+  }
+  $('aktifBox').onclick = function (ev) { var b = ev.target.closest('[data-od]'); if (b) openOrder(b.getAttribute('data-od')); };
   function paintKat() {
     var r = S.kat; if (!r) return;
     var q = S.q.trim().toUpperCase(), searching = !!q, kc = {};
@@ -807,13 +861,15 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
     $('fKat').innerHTML = '<div class="katrow"><button class="katbtn' + (searching ? ' dim' : '') + '" data-katopen="1"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span>Kategori</span><b>' + (S.fk ? esc(S.fk) : 'Semua') + '<svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></b></button>' + (S.fk && !searching ? '<button class="katx" data-katclr="1" aria-label="Kembali ke semua kategori"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>' : '') + '<button class="vmbtn" data-vm="1" aria-label="' + (S.vm === 'list' ? 'Tampilan kotak' : 'Tampilan daftar') + '">' + (S.vm === 'list' ? '<svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>' : '<svg class="i" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>') + '</button>' + '</div>';
     var list = (searching ? r.items : ada).filter(function (it) { return searching ? (it.nama + ' ' + it.kode).toUpperCase().indexOf(q) >= 0 : (!S.fk || it.kategori === S.fk); });
     $('katNote').textContent = searching ? '🔎 ' + list.length + ' hasil (filter kategori diabaikan saat mencari)' : list.length + ' barang tersedia di Gudang ' + cap(r.gudang);
+    var prg = ((r.program || []).filter(function (p) { return p.nama === S.prog; })[0] || {}).kodes || [];
+    if (prg.length) list = list.slice().sort(function (a, b) { return (prg.indexOf(b.kode) >= 0) - (prg.indexOf(a.kode) >= 0); });
     var cart = getCart();
     $('grid').className = 'grid' + (S.vm === 'list' ? ' list' : '');
     $('grid').innerHTML = list.length ? list.map(function (it) {
       var inC = cart.filter(function (c) { return c.kode === it.kode; })[0], habis = it.stok <= 0;
       return '<div class="pc' + (inC ? ' inc' : '') + '"><div class="img"' + (fotoOf(it) ? ' style="background-image:url(\'' + esc(fotoOf(it)) + '\')"' : '') + '>' + (fotoOf(it) ? '' : boxIcon(it.kode)) + (inC ? '<span class="inb">✓ ' + esc(inC.qty) + ' ' + esc(inC.unit === 'kms' ? it.kemasan : it.satuan) + '</span>' : '') + (habis ? '<span class="tag">HABIS</span>' : it.stok <= 10 ? '<span class="tag low">SISA SEDIKIT</span>' : '') + '</div>' +
         '<div class="bd"><div class="nm">' + esc(it.nama) + '</div><div class="sk">Tersedia <b>' + esc(fmtQty(it.stok, it)) + '</b></div>' +
-        (it.isi > 1 ? '<span class="km">1 ' + esc(it.kemasan) + ' isi ' + fmtNum(it.isi) + ' ' + esc(it.satuan) + '</span>' : '') +
+        (prg.indexOf(it.kode) >= 0 ? '<span class="km sr">★ Saran program</span>' : '') + (it.isi > 1 ? '<span class="km">1 ' + esc(it.kemasan) + ' isi ' + fmtNum(it.isi) + ' ' + esc(it.satuan) + '</span>' : '') +
         '<button class="add' + (inC ? ' in' : '') + '" data-add="' + esc(it.kode) + '"' + (habis ? ' disabled' : '') + '>' + (habis ? 'Stok habis' : inC ? (S.vm === 'list' ? '✓ ' : '✓ Di keranjang · ') + inC.qty + ' ' + esc(inC.unit === 'kms' ? it.kemasan : it.satuan) : '<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Keranjang') + '</button></div></div>';
     }).join('') : '<div class="empty" style="grid-column:1/-1">Tidak ada barang yang cocok.</div>';
   }
@@ -977,7 +1033,7 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
   $('coForm').onsubmit = function (ev) {
     ev.preventDefault();
     var lain = /^lainnya$/i.test(me.jabatan || ''), jabLain = $('cJabLain').value.trim().toUpperCase();
-    var d = { nama: $('cNama').value.trim().toUpperCase(), jabatan: lain ? jabLain : (me.jabatan || ''), hp: $('cHp').value.trim(), keperluan: $('cPerlu').value.trim().toUpperCase(), catatan: $('cCat').value.trim() };
+    var d = { nama: $('cNama').value.trim().toUpperCase(), jabatan: lain ? jabLain : (me.jabatan || ''), hp: $('cHp').value.trim(), keperluan: $('cPerlu').value.trim().toUpperCase(), program: S.prog || '', catatan: $('cCat').value.trim() };
     if (d.nama.length < 2) return coErr('Nama wajib diisi.');
     if (!me.jabatan) return coErr('Pilih jabatan.');
     if (lain && jabLain.length < 2) return coErr('Sebutkan jabatan Anda.');
@@ -988,7 +1044,7 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
     coErr('');
     me.nama = d.nama; me.hp = d.hp; me.jabLain = lain ? jabLain : ''; jset(KEY_ME, me);
     var rows = cart.map(function (c) { var it = findItem(c.kode); return '<tr><td>' + esc(it.nama) + '</td><td class="n">' + (c.unit === 'kms' ? fmtNum(c.qty) + ' ' + esc(it.kemasan) + ' = ' : '') + '<b>' + fmtNum(lineJumlah(c)) + '</b> ' + esc(it.satuan) + '</td></tr>'; }).join('');
-    openSheet('<h3>Periksa pengajuan</h3><table class="tbl"><tbody>' + rows + '</tbody></table><div class="help" style="margin:-6px 0 14px">' + esc(d.nama) + ' · ' + esc(d.jabatan) + ' · ' + esc(d.hp) + '<br>' + esc(d.keperluan) + '</div>' +
+    openSheet('<h3>Periksa pengajuan</h3><table class="tbl"><tbody>' + rows + '</tbody></table><div class="help" style="margin:-6px 0 14px">' + esc(d.nama) + ' · ' + esc(d.jabatan) + ' · ' + esc(d.hp) + '<br>' + esc(d.keperluan) + (d.program ? '<br>Program: ' + esc(d.program) : '') + '</div>' +
       '<div class="err hide" id="kErr"></div><div class="btn-row"><button class="btn btn-line" id="kNo">Ubah</button><button class="btn btn-pri" id="kGo">Ya, ajukan</button></div>');
     $('kNo').onclick = closeSheet;
     $('kGo').onclick = function () {
@@ -996,12 +1052,14 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
       api('pubAjukan', d).then(function (r) {
         if (!r.ok) { b.disabled = false; b.textContent = 'Ya, ajukan'; $('kErr').textContent = r.error || 'Gagal mengirim.'; $('kErr').classList.remove('hide'); if (/stok/i.test(r.error || '')) load(); return; }
         var od = jget(KEY_OD, []); od.unshift({ id: r.nomor, hp: d.hp, t: Date.now() }); jset(KEY_OD, od.slice(0, 50));
-        setCart([]); $('cPerlu').value = ''; $('cCat').value = ''; load();
+        var nBrg = cart.length, wa = 'https://wa.me/?text=' + encodeURIComponent('Halo admin gudang ' + cap((S.kat && S.kat.gudang) || '') + ', saya ' + d.nama + ' (' + d.jabatan + ') sudah mengajukan POSM.\nNomor: ' + r.nomor + '\n' + nBrg + ' jenis barang untuk ' + d.keperluan + (d.program ? ' (' + d.program + ')' : '') + '.\nMohon diproses. Terima kasih.');
+        setCart([]); $('cPerlu').value = ''; $('cCat').value = ''; S.prog = ''; load();
         openSheet('<div class="ctr"><div class="ok-big"><svg class="i" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div><h3 style="margin:0 0 4px">Pengajuan terkirim</h3><div class="nomor">' + esc(r.nomor) + '</div>' +
           '<p class="help" style="margin:0 0 16px">Tunggu persetujuan admin gudang. Cek statusnya di <b>Pesanan saya</b>. Barang diambil setelah status <b>Disetujui</b>.</p></div>' +
-          '<button class="btn btn-pri" id="okGo">Lacak pesanan</button>');
+          '<div class="okbtns"><button class="btn btn-pri" id="okWa"><svg class="i" viewBox="0 0 24 24" style="width:20px;height:20px"><path d="M4 5h16v11H9l-5 4z"/></svg>Kabari admin lewat WhatsApp</button><button class="btn btn-line" id="okGo">Lacak pesanan</button></div><p class="help" style="text-align:center;margin:10px 0 0">WhatsApp membuka pilihan kontak. Pilih admin gudang lalu kirim.</p>');
+        $('okWa').onclick = function () { window.open(wa, '_blank'); };
         $('okGo').onclick = function () { closeSheet(); show('pesanan'); };
-      }).catch(function () { b.disabled = false; b.textContent = 'Ya, ajukan'; $('kErr').textContent = 'Tidak tersambung. Pengajuan BELUM terkirim, coba lagi.'; $('kErr').classList.remove('hide'); });
+      }).catch(function () { b.disabled = false; b.textContent = 'Ya, ajukan'; $('kErr').textContent = 'Sinyal putus. Pengajuan BELUM terkirim. Data Anda aman, coba lagi.'; $('kErr').classList.remove('hide'); });
     };
   };
 
@@ -1071,7 +1129,14 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
       '<table class="tbl"><thead><tr><th>Barang</th><th class="n">Jumlah</th></tr></thead><tbody>' + rows + '</tbody></table>' +
       '<div class="help" style="margin:-6px 0 14px">Gudang ' + esc(cap(p.gudang)) + (p.keperluan ? ' · ' + esc(p.keperluan) : '') + '</div>' +
       (p.terbatas ? '<div class="ap-banner" style="margin-bottom:12px"><span><b>Rincian terbatas.</b> Ditemukan lewat nomor pengajuan saja. Cek juga dengan No HP untuk melihat rincian lengkap dan untuk membatalkan.</span></div>' : '') +
-      ((st === 'MENUNGGU' || st === 'DISETUJUI') && !p.terbatas ? '<div class="err hide" id="obErr"></div><button class="btn btn-red" id="obBatal">Batalkan pengajuan</button>' : ''));
+      ((st === 'MENUNGGU' || st === 'DISETUJUI') && !p.terbatas ? '<div class="err hide" id="obErr"></div><button class="btn btn-red" id="obBatal">Batalkan pengajuan</button>' : '') +
+      (!AKTIF[st] ? '<button class="btn btn-pri" id="obUlang"><svg class="i" viewBox="0 0 24 24" style="width:20px;height:20px"><path d="M20 12a8 8 0 1 1-2.5-5.8M20 4v4h-4"/></svg>Pesan ulang barang ini</button>' : ''));
+    if ($('obUlang')) $('obUlang').onclick = function () {
+      var cart = [], lewat = 0;
+      p.items.forEach(function (i) { var it = findItem(i.kode), n = i.minta; if (!it || it.stok < 1) { lewat++; return; } cart.push({ kode: i.kode, unit: 'base', qty: Math.min(n, it.stok) }); });
+      if (!cart.length) { toast('Barang pesanan ini sedang habis.'); return; }
+      setCart(cart); closeSheet(); paintKat(); show('keranjang'); toast(cart.length + ' barang masuk keranjang' + (lewat ? ' (' + lewat + ' habis, dilewati)' : '') + '. Periksa jumlah lalu lanjut.');
+    };
     if ($('obBatal')) $('obBatal').onclick = function () {
       // konfirmasi di dalam halaman (confirm() bawaan browser diblokir di penampil artifak)
       var o = jget(KEY_OD, []).filter(function (x) { return x.id === p.id; })[0] || {};
@@ -1083,7 +1148,7 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
         api('pubBatal', { id: p.id, hp: o.hp }).then(function (r) {
           if (!r.ok) { bt.disabled = false; bt.textContent = 'Ya, batalkan pengajuan'; $('obErr').textContent = r.error || 'Gagal.'; $('obErr').classList.remove('hide'); return; }
           toast(p.id + ' dibatalkan.'); closeSheet(); loadOrders();
-        }).catch(function () { bt.disabled = false; bt.textContent = 'Ya, batalkan pengajuan'; $('obErr').textContent = 'Tidak tersambung.'; $('obErr').classList.remove('hide'); });
+        }).catch(function () { bt.disabled = false; bt.textContent = 'Ya, batalkan pengajuan'; $('obErr').textContent = 'Sinyal putus. Coba lagi.'; $('obErr').classList.remove('hide'); });
       };
     };
   }
@@ -1114,7 +1179,7 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
         jset(KEY_OD, od.slice(0, 50));
         S.ofl = 'semua'; S.oq = ''; closeSheet();
         loadOrders().then(function () { if (r.items.length === 1) openOrder(r.items[0].id); else toast(r.items.length + ' pengajuan ditemukan.'); });
-      }).catch(function () { $('cekGo').disabled = false; tampil('Tidak tersambung. Coba lagi.'); });
+      }).catch(function () { $('cekGo').disabled = false; tampil('Sinyal putus. Coba lagi.'); });
     };
     $('cekGo').onclick = go;
     $('cekNo').onkeydown = $('cekHp').onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); go(); } };
@@ -1184,5 +1249,6 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
   start();
 })();
 </script>
+<script>try{if("serviceWorker" in navigator&&location.protocol==="https:"){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}}catch(e){}</script>
 </body>
 </html>

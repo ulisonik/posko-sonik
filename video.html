@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Video Panduan · POSKO SONIK</title>
+<meta name="theme-color" content="#0E7A44"><link rel="icon" href="logo/posko-ikon-32.png">
+<style>
+  *{box-sizing:border-box} body{margin:0;font-family:Poppins,"Segoe UI",system-ui,Arial,sans-serif;background:#EAF3EC;color:#15283A}
+  header{background:linear-gradient(160deg,#0E7A44,#1A8A4A);color:#fff;padding:18px 16px 22px;border-radius:0 0 28px 28px;display:flex;align-items:center;gap:12px}
+  header img{width:46px;height:46px;border-radius:12px} header b{display:block;font-size:18px;font-weight:800;letter-spacing:.5px} header span{font-size:12px;color:#CDEFD6}
+  main{max-width:720px;margin:0 auto;padding:16px}
+  .kartu{background:#fff;border:1px solid #D5E5D8;border-radius:16px;padding:12px;margin-bottom:14px}
+  .kartu h2{font-size:15px;margin:2px 0 2px} .kartu p{font-size:12px;color:#5E7586;margin:0 0 10px}
+  video{width:100%;max-height:70vh;border-radius:12px;background:#0C1B2C;display:block}
+  a.btn{display:block;text-align:center;background:#1A8A4A;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:13px;border-radius:14px;margin-top:6px}
+  .kecil{font-size:12px;color:#5E7586;text-align:center;margin-top:10px}
+</style></head><body>
+<header><img src="logo/posko-ikon-192.png" alt=""><div><b>POSKO SONIK</b><span>Video panduan</span></div></header>
+<main id="m"></main>
+<script>
+(function () {
+  var V = { pemohon: ['Cara Mengajukan POSM', 'Untuk pemohon \u00B7 \u00B1 4 menit \u00B7 bersuara'], admin1: ['Admin 1 \u00B7 Masuk, Permintaan, Serah Terima', '\u00B1 3 menit'], admin2: ['Admin 2 \u00B7 Mengelola Stok', '\u00B1 2,5 menit'], admin3: ['Admin 3 \u00B7 Riwayat, Laporan, Poster', '\u00B1 2 menit'] };
+  var q = (location.search.match(/[?&]v=([a-z0-9]+)/) || [])[1]; var ids = V[q] ? [q] : ['pemohon'];
+  document.getElementById('m').innerHTML = ids.map(function (id) {
+    return '<div class="kartu"><h2>' + V[id][0] + '</h2><p>' + V[id][1] + '</p><video controls autoplay playsinline preload="metadata" poster="video/' + id + '.jpg"><source src="video/' + id + '.mp4" type="video/mp4"></video></div>';
+  }).join('') + '<a class="btn" href="ambil.html">Buka aplikasi pengajuan</a><div class="kecil">Video bersuara. Gunakan earphone bila di gudang ramai.</div>';
+})();
+</script></body></html>
