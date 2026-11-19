@@ -20,6 +20,6 @@
   var q = (location.search.match(/[?&]v=([a-z0-9]+)/) || [])[1]; var ids = V[q] ? [q] : ['pemohon'];
   document.getElementById('m').innerHTML = ids.map(function (id) {
     return '<div class="kartu"><h2>' + V[id][0] + '</h2><p>' + V[id][1] + '</p><video controls autoplay playsinline preload="metadata" poster="video/' + id + '.jpg"><source src="video/' + id + '.mp4" type="video/mp4"></video></div>';
-  }).join('') + '<a class="btn" href="ambil.html">Buka aplikasi pengajuan</a><div class="kecil">Video bersuara. Gunakan earphone bila di gudang ramai.</div>';
+  }).join('') + '<div class="kecil" style="background:#fff;border:1px solid #D5E5D8;border-radius:14px;padding:12px;color:#15283A;font-size:13px"><b>Mau mengajukan POSM?</b><br>Scan QR POSKO SONIK yang ditempel di gudang dengan kamera HP.</div><div class="kecil">Video bersuara. Gunakan earphone bila di gudang ramai.</div>';
 })();
 </script></body></html>
