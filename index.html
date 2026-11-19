@@ -1904,28 +1904,31 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
       '<div class="det-stk">' + stk + '</div>' +
       '<div class="bc"><svg id="bcSvg"></svg></div>' +
       '<div class="lbl-h">Label untuk printer NIIMBOT (CODE128)</div>' +
-      '<div class="seg2" id="lblSize"><button class="on" data-sz="40x20">40 × 20 mm</button><button data-sz="50x30">50 × 30 mm</button></div>' +
+      '<div class="seg2" id="lblSize"><button data-sz="40x20">40 × 20 mm</button><button data-sz="50x30">50 × 30 mm</button></div>' +
       '<div class="lbl-prev"><img id="lblImg" alt="Pratinjau label"></div>' +
-      '<div class="lbl-act"><button class="btn btn-line" id="copyBtn"><svg class="i" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>Salin kode</button>' +
-      '<button class="btn btn-pri" id="shareBtn"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 8.5 12 4l4.5 4.5M5 14v5h14v-5"/></svg>Bagikan gambar</button></div>' +
-      '<p class="help" style="text-align:center;margin-top:10px">Bagikan gambar ke aplikasi NIIMBOT, atau salin kode lalu tempel di elemen Barcode (CODE128).</p>' +
+      '<div class="lbl-act" style="grid-template-columns:1fr"><button class="btn btn-pri" id="saveImgBtn"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>Simpan gambar ke HP</button></div>' +
+      '<div class="lbl-act" style="margin-top:8px"><button class="btn btn-line" id="copyBtn"><svg class="i" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>Salin kode</button>' +
+      '<button class="btn btn-line" id="shareBtn"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 8.5 12 4l4.5 4.5M5 14v5h14v-5"/></svg>Bagikan gambar</button></div>' +
+      '<p class="help" style="text-align:center;margin-top:10px">Simpan gambar ke HP, lalu di aplikasi NIIMBOT pilih Tambah → Gambar dan ambil gambar label ini.</p>' +
       '<div class="lbl-h" style="margin-top:18px">Riwayat masuk / keluar</div><div class="card" style="padding:4px 12px" id="rbList"><div class="empty" style="padding:14px">Memuat riwayat…</div></div>' +
       '<div class="btn-row" style="margin-top:16px"><button class="btn btn-line" id="dUbah"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>Ubah barang</button><button class="btn btn-soft-red" id="dNon">Nonaktifkan</button></div>');
     loadRiwayatBarang(it.kode);
     $('dUbah').onclick = function () { closeSheet(); S.editKode = it.kode; show('barang'); };
     $('dNon').onclick = function () { setAktif(it.kode, false, it.nama); };
     drawBarcode('#bcSvg', it.kode, 2, 70);
-    var sz = '40x20';
+    var sz = lblSizePref();
+    [].forEach.call($('lblSize').children, function (x) { x.classList.toggle('on', x.getAttribute('data-sz') === sz); });
     var paint = function () { var c = labelCanvas(it, sz); $('lblImg').src = c ? c.toDataURL('image/png') : ''; };
     paint();
     $('lblSize').onclick = function (ev) {
       var b = ev.target.closest('[data-sz]'); if (!b) return;
-      sz = b.getAttribute('data-sz');
+      sz = b.getAttribute('data-sz'); try { localStorage.setItem('ms_lbl_sz', sz); } catch (e) { }
       [].forEach.call(this.children, function (x) { x.classList.toggle('on', x === b); });
       paint();
     };
     $('copyBtn').onclick = function () { copyText(it.kode); };
     $('shareBtn').onclick = function () { shareLabel(it, sz); };
+    $('saveImgBtn').onclick = function () { simpanLabel(it, sz); };
   }
 
   /* ---------- label NIIMBOT B1 Pro (300 dpi): 40x20 mm = 472x236 px, 50x30 mm = 591x354 px ---------- */
@@ -1962,6 +1965,22 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
     if (cur) lines.push(cur);
     if (lines.length > maxLines) { lines = lines.slice(0, maxLines); var l = lines[maxLines - 1]; while (l.length > 1 && x.measureText(l + '…').width > maxW) l = l.slice(0, -1); lines[maxLines - 1] = l + '…'; }
     return lines.map(function (l) { while (l.length > 1 && x.measureText(l).width > maxW) l = l.slice(0, -2) + '…'; return l; });
+  }
+  function lblSizePref() { try { var v = localStorage.getItem('ms_lbl_sz'); if (LABEL[v]) return v; } catch (e) { } return '50x30'; }
+  function unduhBlob(blob, name) { var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000); }
+  function simpanLabel(it, sz) {
+    var c = labelCanvas(it, sz); if (!c) { toast('Pustaka barcode belum termuat.'); return; }
+    c.toBlob(function (blob) { var name = 'label_' + it.kode + '_' + sz + '.png'; unduhBlob(blob, name); toast('Gambar tersimpan: ' + name); }, 'image/png');
+  }
+  /** Banyak barang: semua gambar label dalam satu berkas ZIP (satu PNG per barang). */
+  function simpanLabelZip(list, sz) {
+    toast('Menyiapkan ' + list.length + ' gambar…');
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js', 'JSZip').then(function () {
+      var zip = new JSZip(), n = 0;
+      list.forEach(function (it) { var c = labelCanvas(it, sz); if (!c) return; zip.file('label_' + it.kode + '_' + sz + '.png', c.toDataURL('image/png').split(',')[1], { base64: true }); n++; });
+      if (!n) { toast('Pustaka barcode belum termuat.'); return; }
+      return zip.generateAsync({ type: 'blob' }).then(function (blob) { var d = new Date(), tg = d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2), name = 'label_gambar_' + sz + '_' + tg + '.zip'; unduhBlob(blob, name); closeSheet(); toast('Tersimpan: ' + name + ' (' + n + ' gambar). Buka file ZIP lalu ekstrak.'); });
+    }).catch(function () { toast('Gagal memuat pustaka ZIP. Periksa sinyal.'); });
   }
   function shareLabel(it, sz) {
     var c = labelCanvas(it, sz); if (!c) { toast('Pustaka barcode belum termuat.'); return; }
@@ -2016,9 +2035,15 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
       var file = new File([blob], name, { type: XLSX_MIME });
       var canShare = !!(navigator.canShare && navigator.canShare({ files: [file] }));
       openSheet('<h3>Ekspor label (Excel)</h3>' +
-        '<p class="help" style="margin:-6px 0 14px">' + list.length + ' barang · kolom Kode_Barang, Nama_Barang, Kategori, Satuan. Di aplikasi NIIMBOT: buka template label, lalu impor Excel dari file lokal atau dari WhatsApp. Pilih kolom Kode_Barang untuk elemen Barcode (CODE128).</p>' +
+        '<p class="help" style="margin:-6px 0 14px">' + list.length + ' barang · kolom Kode_Barang, Nama_Barang, Kategori, Satuan. Excel berisi daftar nama dan kode. Untuk barcode, NIIMBOT hanya menerima GAMBAR: pakai "Simpan gambar label (ZIP)" di bawah.</p>' +
+        '<button class="act" id="xZip"><span class="ic" style="background:#FFC72A;color:#17304F"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16v12H4zM8 7V4h8v3M10 12h4"/></svg></span><span><b>Simpan gambar label (ZIP)</b><small>Satu gambar PNG per barang, ukuran <span id="xZipSz"></span></small></span></button>' +
+        '<div class="seg2" id="xZipPick" style="margin:-2px 0 12px"><button data-sz="40x20">40 × 20 mm</button><button data-sz="50x30">50 × 30 mm</button></div>' +
         '<button class="act" id="xSave"><span class="ic" style="background:var(--teal-xl);color:var(--teal)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg></span><span><b>Simpan ke HP</b><small>File lokal (folder Download)</small></span></button>' +
         (canShare ? '<button class="act" id="xShare"><span class="ic" style="background:var(--green-l);color:var(--green)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 8.5 12 4l4.5 4.5M5 14v5h14v-5"/></svg></span><span><b>Bagikan</b><small>Ke WhatsApp atau aplikasi lain</small></span></button>' : '<p class="help">Bagikan langsung tidak didukung di perangkat ini. Pakai Simpan ke HP, lalu kirim file lewat WhatsApp.</p>'));
+      var zsz = lblSizePref(), zpaint = function () { $('xZipSz').textContent = zsz.replace('x', ' × ') + ' mm'; [].forEach.call($('xZipPick').children, function (x) { x.classList.toggle('on', x.getAttribute('data-sz') === zsz); }); };
+      zpaint();
+      $('xZipPick').onclick = function (ev) { var b = ev.target.closest('[data-sz]'); if (!b) return; zsz = b.getAttribute('data-sz'); try { localStorage.setItem('ms_lbl_sz', zsz); } catch (e) { } zpaint(); };
+      $('xZip').onclick = function () { simpanLabelZip(list, zsz); };
       $('xSave').onclick = function () {
         var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
         document.body.appendChild(a); a.click(); a.remove();
