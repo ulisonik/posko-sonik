@@ -245,6 +245,29 @@
   .scn-it { display:flex; justify-content:space-between; gap:10px; font-size:13px; padding:8px 10px; background:var(--bg); border-radius:10px; }
   .scn-it b { font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .scn-it span { font-weight:700; color:var(--teal); flex:none; }
+  .scn-it b i { font-style:normal; display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; margin-right:7px; border-radius:50%; background:#1A8A4A; color:#fff; font-size:11px; font-weight:800; }
+  .scn-it { background:#E8F5EC; }
+  .scn-pop.good { background:#1A8A4A; color:#fff; font-size:14px; padding:12px 16px; box-shadow:0 6px 18px rgba(0,0,0,.3); max-width:86%; text-align:center; }
+  .scn-cart { margin-left:auto; margin-right:10px; display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:20px; background:rgba(255,255,255,.14); color:#fff; font-size:12px; font-weight:600; white-space:nowrap; }
+  .scn-cart.ada { background:#1A8A4A; }
+  .scn-cart svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2.2; }
+  .scn-cart b { font-size:14px; flex:none; }
+  .scn-pop.good { white-space:normal; overflow:visible; text-overflow:clip; line-height:1.3; }
+  .scn-c-in { background:#E8F5EC; border:1.5px solid #1A8A4A; color:#0E5E34; border-radius:12px; padding:9px 12px; font-size:13px; }
+  .scn.cardmode .scn-man, .scn.cardmode .scn-list, .scn.cardmode #scnDone { display:none; }
+  .scn-card { display:flex; flex-direction:column; gap:10px; }
+  .scn-c-h b { display:block; font-size:16px; }
+  .scn-c-h small { font-size:12px; color:var(--muted); }
+  .scn-c-u { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .scn-c-u button { height:40px; border-radius:12px; border:1.5px solid #B2D3BD; background:#fff; font:inherit; font-size:13px; font-weight:600; color:var(--teal); }
+  .scn-c-u button.on { background:var(--teal); color:#fff; border-color:var(--teal); }
+  .scn-c-q { display:flex; align-items:center; justify-content:center; gap:10px; }
+  .scn-c-q button { width:48px; height:48px; border-radius:14px; border:1.5px solid #B2D3BD; background:#fff; font-size:26px; font-weight:600; color:var(--teal); line-height:1; padding:0; }
+  .scn-c-q input { width:84px; height:48px; border:1.5px solid #B2D3BD; border-radius:14px; text-align:center; font:inherit; font-size:22px; font-weight:700; outline:0; padding:0; background:#fff; -moz-appearance:textfield; }
+  .scn-c-q input::-webkit-outer-spin-button, .scn-c-q input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+  .scn-c-q span { font-size:14px; font-weight:600; color:var(--muted); min-width:44px; }
+  .scn-c-n { font-size:12px; color:var(--red); text-align:center; }
+  .scn-c-act { display:grid; grid-template-columns:1fr 2fr; gap:10px; }
   .scn-empty { font-size:12px; color:var(--muted); text-align:center; padding:4px; }
 
   /* ===== Laptop / desktop ===== */
@@ -652,9 +675,10 @@
 <div class="sheet" id="sheet"><button class="sh-x" id="sheetX" aria-label="Tutup"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div id="sheetBody"></div></div>
 
 <div class="scn hide" id="scn" role="dialog" aria-label="Scan barcode">
-  <div class="scn-top"><b>Scan barcode di rak<small id="scnSub">Setiap scan = +1 ke keranjang</small></b><button class="scn-x" id="scnClose" aria-label="Tutup"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="scn-top"><b>Scan barcode di rak<small id="scnSub">Scan, atur jumlah, lalu masukkan ke keranjang.</small></b><span class="scn-cart" id="scnCnt" aria-label="Isi keranjang"></span><button class="scn-x" id="scnClose" aria-label="Tutup"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <div class="scn-cam"><div id="scanView"></div><div class="scn-frame" id="scnFrame"></div><div class="scn-pop" id="scnPop"></div><div class="scn-msg" id="scnMsg">Menyalakan kamera…</div></div>
   <div class="scn-bot">
+    <div class="scn-card hide" id="scnCard"></div>
     <form class="scn-man" id="scnMan"><input id="scnCode" placeholder="Atau ketik kode, mis. SOQ001" autocomplete="off"><button type="submit">Tambah</button></form>
     <div class="scn-list" id="scnList"></div>
     <button class="btn btn-pri" id="scnDone">Lihat keranjang</button>
@@ -1193,45 +1217,91 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
   function scnMsg(m, err) { var e = $('scnMsg'); e.textContent = m; e.classList.toggle('err', !!err); }
   function openScan() {
     if (!S.kat) { toast('Katalog belum termuat.'); return; }
-    SC.hits = {}; SC.order = []; SC.last = ''; paintScn(); scnMsg('Menyalakan kamera…');
+    SC.hits = {}; SC.order = []; SC.last = ''; SC.card = null; $('scn').classList.remove('cardmode'); $('scnCard').classList.add('hide'); paintScn(); scnMsg('Menyalakan kamera…');
     $('scn').classList.remove('hide');
     loadQr().then(function () {
       if ($('scn').classList.contains('hide')) return;
       var F = window.Html5QrcodeSupportedFormats;
       SC.h = new Html5Qrcode('scanView', { formatsToSupport: [F.CODE_128], experimentalFeatures: { useBarCodeDetectorIfSupported: true }, verbose: false });
       return SC.h.start({ facingMode: 'environment' }, { fps: 12, disableFlip: true, qrbox: function (w, h) { return { width: Math.round(Math.min(w * 0.8, 380)), height: Math.round(Math.min(h * 0.45, 150)) }; } }, function (t) { terima(t); }, function () {})
-        .then(function () { scnMsg('Arahkan ke barcode di rak. Scan lagi untuk menambah jumlah.'); });
+        .then(function () { scnMsg('Arahkan ke barcode di rak.'); });
     }).catch(function (e) {
       var m = String(e && (e.name || e.message) || e);
       scnMsg(/NotAllowed|Permission/i.test(m) ? 'Izin kamera ditolak. Izinkan kamera di pengaturan browser, atau ketik kode di bawah.' : 'Kamera tidak bisa dibuka. Ketik kode di bawah.', true);
     });
   }
   function closeScanner() {
-    var h = SC.h; SC.h = null; $('scn').classList.add('hide');
+    var h = SC.h; SC.h = null; SC.card = null; $('scn').classList.remove('cardmode'); $('scnCard').classList.add('hide'); $('scn').classList.add('hide');
     if (h) { try { h.stop().then(function () { h.clear(); }).catch(function () {}); } catch (e) {} }
     paintKat();
   }
   var popT;
+  function scnPop(msg, ok) { var p = $('scnPop'); p.textContent = (ok ? '\u2713 ' : '\u2715 ') + msg; p.classList.toggle('bad', !ok); p.classList.toggle('good', !!ok); p.classList.add('show'); clearTimeout(popT); popT = setTimeout(function () { p.classList.remove('show'); }, ok ? 2600 : 1600); }
   function terima(raw, manual) {
     var k = String(raw || '').trim().toUpperCase().replace(/\s+/g, ''), now = Date.now();
     if (!k) return;
+    if (SC.card) return; // kartu jumlah sedang terbuka: abaikan scan lain
     if (!manual && k === SC.last && now - SC.lastT < 1500) return;
     SC.last = k; SC.lastT = now;
-    var it = findItem(k), ok = false, msg;
-    if (!it) msg = k + ' tidak ada di gudang ini';
-    else {
-      var cart = getCart(), c = cart.filter(function (x) { return x.kode === k; })[0];
-      var coba = c ? { kode: k, unit: c.unit, qty: c.qty + 1 } : { kode: k, unit: 'base', qty: 1 };
-      if (lineJumlah(coba) > it.stok) msg = 'Stok ' + it.nama + ' tidak cukup';
-      else { if (c) c.qty = coba.qty; else cart.push(coba); setCart(cart); ok = true; msg = it.nama + ' · ' + coba.qty + ' ' + (coba.unit === 'kms' ? it.kemasan : it.satuan); }
-    }
-    try { if (navigator.vibrate) navigator.vibrate(ok ? 60 : [40, 60, 40]); } catch (e) {}
-    $('scnFrame').classList.toggle('hit', ok); setTimeout(function () { $('scnFrame').classList.remove('hit'); }, 400);
-    var p = $('scnPop'); p.textContent = (ok ? '✓ ' : '✕ ') + msg; p.classList.toggle('bad', !ok); p.classList.add('show'); clearTimeout(popT); popT = setTimeout(function () { p.classList.remove('show'); }, 1400);
-    if (ok) { if (!SC.hits[k]) { SC.hits[k] = { nama: it.nama, n: 0 }; SC.order.unshift(k); } SC.hits[k].n++; paintScn(); }
+    var it = findItem(k);
+    try { if (navigator.vibrate) navigator.vibrate(it && it.stok > 0 ? 60 : [40, 60, 40]); } catch (e) {}
+    if (!it) { scnPop(k + ' tidak ada di gudang ini', false); return; }
+    if (it.stok < 1) { scnPop(it.nama + ' stoknya habis', false); return; }
+    bukaKartu(it);
   }
+  /** Kartu jumlah: jumlah bawaan 1, bisa diubah, baru "Masukkan ke keranjang". */
+  function bukaKartu(it) {
+    var cart = getCart(), c = cart.filter(function (x) { return x.kode === it.kode; })[0];
+    SC.card = { k: it.kode, unit: c ? c.unit : 'base', qty: 1 };
+    $('scnFrame').classList.add('hit'); $('scn').classList.add('cardmode'); $('scnCard').classList.remove('hide');
+    paintKartu();
+  }
+  function kartuMax(it, unit, ada) { var per = unit === 'kms' && it.isi > 1 ? it.isi : 1; return Math.max(0, Math.floor(it.stok / per) - (ada || 0)); }
+  function paintKartu() {
+    var cd = SC.card, it = cd && findItem(cd.k); if (!it) return;
+    var cart = getCart(), c = cart.filter(function (x) { return x.kode === cd.k; })[0], ada = c ? c.qty : 0, mx = kartuMax(it, cd.unit, ada);
+    var uLabel = cd.unit === 'kms' ? it.kemasan : it.satuan, punyaKms = it.isi > 1 && it.kemasan;
+    cd.qty = Math.max(1, Math.min(cd.qty, mx || 1));
+    $('scnCard').innerHTML = '<div class="scn-c-h"><b>' + esc(it.nama) + '</b><small>' + esc(it.kode) + ' \u00B7 stok ' + it.stok + ' ' + esc(it.satuan) + '</small></div>' +
+      (ada ? '<div class="scn-c-in">\u2713 Sudah di keranjang: <b>' + ada + ' ' + esc(uLabel) + '</b>. Jumlah di bawah akan DITAMBAHKAN.</div>' : '') +
+      (punyaKms && !c ? '<div class="scn-c-u"><button type="button" data-u="base" class="' + (cd.unit === 'base' ? 'on' : '') + '">' + esc(it.satuan) + '</button><button type="button" data-u="kms" class="' + (cd.unit === 'kms' ? 'on' : '') + '">' + esc(it.kemasan) + ' (isi ' + it.isi + ')</button></div>' : '') +
+      '<div class="scn-c-q"><button type="button" data-d="-1" aria-label="Kurangi">\u2212</button><input type="number" inputmode="numeric" min="1" max="' + mx + '" value="' + cd.qty + '" id="scnQ" aria-label="Jumlah"><button type="button" data-d="1" aria-label="Tambah">+</button><span>' + esc(uLabel) + '</span></div>' +
+      (mx < 1 ? '<div class="scn-c-n">Jumlah di keranjang sudah sebesar stok.</div>' : '') +
+      '<div class="scn-c-act"><button type="button" class="btn btn-line" id="scnCBatal">Batal</button><button type="button" class="btn btn-pri" id="scnCOk"' + (mx < 1 ? ' disabled' : '') + '>Masukkan ke keranjang</button></div>';
+  }
+  function tutupKartu(ok) {
+    var k = SC.card && SC.card.k; SC.card = null; $('scn').classList.remove('cardmode'); $('scnCard').classList.add('hide'); $('scnFrame').classList.remove('hit');
+    // barcode masih di depan kamera: tahan scan ulang ~3 dtk agar tidak langsung muncul lagi
+    if (k) { SC.last = k; SC.lastT = Date.now() + 1500; }
+  }
+  $('scnCard').onclick = function (ev) {
+    var cd = SC.card; if (!cd) return; var it = findItem(cd.k); if (!it) return;
+    var d = ev.target.closest('[data-d]'), u = ev.target.closest('[data-u]');
+    if (d) { cd.qty += Number(d.getAttribute('data-d')); paintKartu(); return; }
+    if (u) { cd.unit = u.getAttribute('data-u'); cd.qty = 1; paintKartu(); return; }
+    if (ev.target.closest('#scnCBatal')) { tutupKartu(false); return; }
+    if (ev.target.closest('#scnCOk')) {
+      var inp = $('scnQ'); if (inp) cd.qty = Math.floor(Number(inp.value) || 1);
+      var cart = getCart(), c = cart.filter(function (x) { return x.kode === cd.k; })[0], ada = c ? c.qty : 0, mx = kartuMax(it, cd.unit, ada), q = Math.max(1, Math.min(cd.qty, mx));
+      if (mx < 1) { scnPop('Stok ' + it.nama + ' tidak cukup', false); return; }
+      if (c) c.qty += q; else cart.push({ kode: cd.k, unit: cd.unit, qty: q });
+      setCart(cart);
+      var tot = c ? c.qty : q, uL = cd.unit === 'kms' ? it.kemasan : it.satuan;
+      if (!SC.hits[cd.k]) { SC.hits[cd.k] = { nama: it.nama }; SC.order.unshift(cd.k); }
+      tutupKartu(true); paintScn(); scnPop('Masuk keranjang \u00B7 ' + it.nama + ' \u00B7 total ' + tot + ' ' + uL, true);
+    }
+  };
+  $('scnCard').onchange = function (ev) { var inp = ev.target.closest('#scnQ'); if (inp && SC.card) { SC.card.qty = Math.floor(Number(inp.value) || 1); paintKartu(); } };
   function paintScn() {
-    $('scnList').innerHTML = SC.order.length ? SC.order.map(function (k) { return '<div class="scn-it"><b>' + esc(SC.hits[k].nama) + '</b><span>+' + SC.hits[k].n + '</span></div>'; }).join('') : '<div class="scn-empty">Barang yang di-scan langsung masuk keranjang.</div>';
+    var cart = getCart(), urut = SC.order.slice();
+    cart.forEach(function (c) { if (urut.indexOf(c.kode) < 0) urut.push(c.kode); });
+    var rows = urut.map(function (k) {
+      var c = cart.filter(function (x) { return x.kode === k; })[0], it = findItem(k); if (!c || !it) return '';
+      return '<div class="scn-it"><b><i>\u2713</i>' + esc(it.nama) + '</b><span>' + c.qty + ' ' + esc(c.unit === 'kms' ? it.kemasan : it.satuan) + '</span></div>';
+    }).filter(Boolean);
+    $('scnCnt').innerHTML = rows.length ? '<svg class="i" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11h10.2L20 7H6.2M9 20a1 1 0 1 0 0 .01M17 20a1 1 0 1 0 0 .01"/></svg><b>' + rows.length + '</b> barang' : 'Keranjang kosong';
+    $('scnCnt').classList.toggle('ada', rows.length > 0);
+    $('scnList').innerHTML = rows.length ? '<div class="scn-empty" style="text-align:left;padding:0 2px;font-weight:700;color:var(--teal)">\u2713 Sudah di keranjang (' + rows.length + ' barang)</div>' + rows.join('') : '<div class="scn-empty">Belum ada barang. Scan barcode di rak.</div>';
   }
   $('scnMan').onsubmit = function (ev) { ev.preventDefault(); terima($('scnCode').value, true); $('scnCode').value = ''; };
   $('scnClose').onclick = closeScanner;
