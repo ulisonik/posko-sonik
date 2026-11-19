@@ -2507,7 +2507,7 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
      Maka entri "gerbang" juga didorong pada ketukan pertama (HANYA event yang memberi aktivasi pengguna: touchend/pointerup/click/keydown; pointerdown/touchstart TIDAK memberi aktivasi), bukan hanya saat halaman dibuka. GB.n = jumlah entri di atas halaman. */
   function gbPush() { try { history.pushState({ a: 1 }, ''); GB.n++; return true; } catch (e) { return false; } }
   try { history.replaceState({ g: 1 }, ''); gbPush(); } catch (e) { /* mis. penampil artefak: abaikan */ }
-  ['touchend', 'pointerup', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, function () { if (GB.armed || GB.out) return; GB.armed = true; gbPush(); }, { capture: true, passive: true }); });
+  ['touchend', 'pointerup', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, function () { if (GB.out || GB.n >= 2) return; GB.armed = true; gbPush(); }, { capture: true, passive: true }); }); // dipasang ulang tiap ketukan sampai ada 2 entri di atas halaman (entri tanpa sentuhan bisa dilewati Chrome)
   window.addEventListener('popstate', function () {
     if (GB.out) return;
     GB.n = Math.max(0, GB.n - 1); GB.armed = false; if (!gbPush()) return; // sisakan satu entri agar Back berikutnya tetap tertangkap; sentuhan berikutnya memasang entri baru yang sah
