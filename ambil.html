@@ -1281,7 +1281,7 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
     if (u) { cd.unit = u.getAttribute('data-u'); cd.qty = 1; paintKartu(); return; }
     if (ev.target.closest('#scnCBatal')) { tutupKartu(false); return; }
     if (ev.target.closest('#scnCOk')) {
-      var inp = $('scnQ'); if (inp) cd.qty = Math.floor(Number(inp.value) || 1);
+      kartuKetik(false); if ($('scnQ') && $('scnQ').value === '') cd.qty = 1;
       var cart = getCart(), c = cart.filter(function (x) { return x.kode === cd.k; })[0], ada = c ? c.qty : 0, mx = kartuMax(it, cd.unit, ada), q = Math.max(1, Math.min(cd.qty, mx));
       if (mx < 1) { scnPop('Stok ' + it.nama + ' tidak cukup', false); return; }
       if (c) c.qty += q; else cart.push({ kode: cd.k, unit: cd.unit, qty: q });
@@ -1291,7 +1291,17 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
       tutupKartu(true); paintScn(); scnPop('Masuk keranjang \u00B7 ' + it.nama + ' \u00B7 total ' + tot + ' ' + uL, true);
     }
   };
-  $('scnCard').onchange = function (ev) { var inp = ev.target.closest('#scnQ'); if (inp && SC.card) { SC.card.qty = Math.floor(Number(inp.value) || 1); paintKartu(); } };
+  /** Ketik manual: perbarui angka TANPA menggambar ulang kartu (agar ketukan tombol Masukkan tidak hilang saat kolom kehilangan fokus). */
+  function kartuKetik(final) {
+    var inp = $('scnQ'), cd = SC.card, it = cd && findItem(cd.k); if (!inp || !it) return;
+    var c = getCart().filter(function (x) { return x.kode === cd.k; })[0], mx = kartuMax(it, cd.unit, c ? c.qty : 0), v = Math.floor(Number(inp.value));
+    if (inp.value === '' && !final) return; // sedang mengetik
+    if (!v || v < 1) v = 1;
+    if (v > mx) { v = Math.max(1, mx); if (final) scnPop('Maksimal ' + mx + ' ' + (cd.unit === 'kms' ? it.kemasan : it.satuan) + ' (sesuai stok)', false); }
+    cd.qty = v; if (final || String(v) !== inp.value) inp.value = v;
+  }
+  $('scnCard').oninput = function (ev) { if (ev.target.closest('#scnQ')) kartuKetik(false); };
+  $('scnCard').onchange = function (ev) { if (ev.target.closest('#scnQ')) kartuKetik(true); };
   function paintScn() {
     var cart = getCart(), urut = SC.order.slice();
     cart.forEach(function (c) { if (urut.indexOf(c.kode) < 0) urut.push(c.kode); });
