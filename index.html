@@ -2434,6 +2434,27 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
     if (window.Html5Qrcode) return Promise.resolve();
     return loadScript(QR_SRC[0], 'Html5Qrcode').catch(function () { return loadScript(QR_SRC[1], 'Html5Qrcode'); });
   }
+  /* Kamera scan resolusi tinggi: minta Full HD (1920x1080, cadangan 1280x720 otomatis oleh HP) + fokus terus-menerus + sedikit zoom bila didukung.
+     Bawaan html5-qrcode hanya 640x480 -> gambar buram & barcode kecil sulit terbaca. */
+  function mulaiKameraHD(h, cb) {
+    var box = function (w, hh) { return { width: Math.round(Math.min(w * 0.8, 380)), height: Math.round(Math.min(hh * 0.45, 150)) }; };
+    var cfg = function (hd) {
+      var c = { fps: 15, disableFlip: true, qrbox: box };
+      if (hd) c.videoConstraints = { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } };
+      return c;
+    };
+    return h.start({ facingMode: 'environment' }, cfg(true), cb, function () {}).catch(function (e) {
+      if (/NotAllowed|Permission|NotFound/i.test(String(e && (e.name || e.message) || e))) throw e;
+      return h.start({ facingMode: 'environment' }, cfg(false), cb, function () {});
+    }).then(function () {
+      try {
+        var cap = h.getRunningTrackCapabilities ? h.getRunningTrackCapabilities() : {}, adv = {};
+        if (cap.focusMode && cap.focusMode.indexOf('continuous') >= 0) adv.focusMode = 'continuous';
+        if (cap.zoom && cap.zoom.max >= 1.5) adv.zoom = Math.max(cap.zoom.min || 1, 1.5);
+        if (Object.keys(adv).length) h.applyVideoConstraints({ advanced: [adv] }).catch(function () {});
+      } catch (e) {}
+    });
+  }
   function bersihKode(t) { return String(t || '').trim().toUpperCase().replace(/\s+/g, ''); }
   function openScanner(opts) {
     SC.opts = opts; SC.hits = {}; SC.order = []; SC.last = ''; SC.lastT = 0;
@@ -2447,8 +2468,7 @@ var DEMO = /[?&]demo=1/.test(location.search) || !API_URL;
       if ($('scn').classList.contains('hide')) return;
       var F = window.Html5QrcodeSupportedFormats;
       SC.h = new Html5Qrcode('scanView', { formatsToSupport: [F.CODE_128], experimentalFeatures: { useBarCodeDetectorIfSupported: true }, verbose: false });
-      return SC.h.start({ facingMode: 'environment' }, { fps: 12, disableFlip: true, qrbox: function (w, h) { return { width: Math.round(Math.min(w * 0.8, 380)), height: Math.round(Math.min(h * 0.45, 150)) }; } },
-        function (text) { terimaKode(text); }, function () {})
+      return mulaiKameraHD(SC.h, function (text) { terimaKode(text); })
         .then(function () { scnMsg(opts.sekali ? 'Arahkan ke barcode barang' : 'Scan barcode satu per satu. Scan lagi untuk menambah jumlah.'); });
     }).catch(function (e) {
       var m = String(e && (e.name || e.message) || e);
